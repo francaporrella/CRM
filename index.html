@@ -2,7 +2,12 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="View CRM">
+<meta name="theme-color" content="#0f172a">
 <title>CRM · Grupo View</title>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -10,41 +15,126 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;}
-body{font-family:'DM Sans',sans-serif;margin:0;background:#f1f5f9;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:'DM Sans',sans-serif;margin:0;background:#f1f5f9;overscroll-behavior:none;}
 .syne{font-family:'Syne',sans-serif;}
-::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar{width:4px;height:4px;}
 ::-webkit-scrollbar-thumb{background:#94a3b8;border-radius:4px;}
+ 
+/* Kanban */
 .kanban-scroll{overflow-x:auto;padding-bottom:12px;}
 .kanban-board{display:flex;gap:16px;min-width:max-content;}
 .kanban-col{width:210px;min-height:300px;}
+ 
+/* Animations */
 .fade-in{animation:fadeIn .25s ease;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.slide-up{animation:slideUp .3s ease;}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+.slide-down{animation:slideDown .3s ease;}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:none;}}
+.modal-up{animation:modalUp .3s cubic-bezier(.32,0,.67,0) reverse, modalUp .3s cubic-bezier(.33,1,.68,1);}
+@keyframes modalUp{from{opacity:0;transform:translateY(100%);}to{opacity:1;transform:none;}}
+ 
+/* Interactions */
 input:focus,select:focus,textarea:focus{outline:none;box-shadow:0 0 0 2px #14b8a6;}
 .card-hover{transition:box-shadow .15s;}
-.card-hover:hover{box-shadow:0 4px 20px rgba(0,0,0,.08);}
-@keyframes spin{to{transform:rotate(360deg);}}
+@media(hover:hover){.card-hover:hover{box-shadow:0 4px 20px rgba(0,0,0,.08);}}
+button:active{opacity:.75;}
+ 
+/* Utility */
+@keyframes spin{to{transform:rotate(360deg)}}
 .spin{animation:spin 1s linear infinite;}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 .pulse{animation:pulse 1.5s infinite;}
-@keyframes slideUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
-.slide-up{animation:slideUp .3s ease;}
-.sync-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.sync-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;transition:background .3s;}
+ 
+/* ── MOBILE LAYOUT ── */
+@media(max-width:767px){
+  /* Bottom nav */
+  .bottom-nav{
+    display:flex;position:fixed;bottom:0;left:0;right:0;z-index:100;
+    background:#0f172a;border-top:1px solid rgba(255,255,255,.08);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .bottom-nav-item{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:8px 4px 6px;border:none;background:none;cursor:pointer;
+    color:#64748b;font-size:10px;font-family:'DM Sans',sans-serif;gap:2px;
+    min-height:52px;position:relative;transition:color .15s;
+  }
+  .bottom-nav-item.active{color:#0d9488;}
+  .bottom-nav-item .nav-icon{font-size:20px;line-height:1;}
+  .bottom-nav-badge{
+    position:absolute;top:6px;right:calc(50% - 18px);
+    background:#ef4444;color:white;font-size:9px;font-weight:700;
+    border-radius:20px;min-width:16px;height:16px;
+    display:flex;align-items:center;justify-content:center;padding:0 3px;
+  }
+ 
+  /* Mobile header */
+  .mobile-header{
+    display:flex;align-items:center;justify-content:space-between;
+    background:#0f172a;padding:12px 16px;
+    padding-top:calc(12px + env(safe-area-inset-top));
+  }
+  .desktop-sidebar{display:none !important;}
+  .desktop-syncbar{display:none !important;}
+ 
+  /* Main content gets bottom padding for nav bar */
+  .main-content{padding-bottom:72px !important;}
+ 
+  /* Full-screen modals on mobile */
+  .modal-overlay{
+    align-items:flex-end !important;padding:0 !important;
+  }
+  .modal-box{
+    border-radius:20px 20px 0 0 !important;
+    max-height:92vh !important;width:100% !important;max-width:100% !important;
+    animation:modalUp .3s cubic-bezier(.33,1,.68,1);
+  }
+ 
+  /* Compact content padding */
+  .page-pad{padding:16px !important;}
+ 
+  /* Bigger touch targets */
+  .touch-target{min-height:44px;display:flex;align-items:center;}
+  input,select,textarea{font-size:16px !important;} /* prevent zoom on iOS */
+ 
+  /* Hide desktop-only elements */
+  .desktop-only{display:none !important;}
+ 
+  /* Kanban mobile: single column selector */
+  .kanban-mobile-selector{
+    display:flex;gap:8px;overflow-x:auto;padding:0 0 8px;
+    scrollbar-width:none;-webkit-overflow-scrolling:touch;
+  }
+  .kanban-mobile-selector::-webkit-scrollbar{display:none;}
+  .kanban-desktop{display:none;}
+  .kanban-mobile-col{display:block;}
+}
+ 
+@media(min-width:768px){
+  .bottom-nav{display:none;}
+  .mobile-header{display:none;}
+  .mobile-syncbar{display:none;}
+  .kanban-desktop{display:block;}
+  .kanban-mobile-col{display:none;}
+  .kanban-mobile-selector{display:none;}
+}
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
 const {useState,useEffect,useRef,useMemo,useCallback}=React;
-
-/* ═══════════════════════════════════════════
-   DATOS INICIALES (se cargan la primera vez)
-═══════════════════════════════════════════ */
+ 
+/* ─── INIT DATA ─── */
 const INIT={
   clientes:[
     {id:1,nombre:"María González",telefono:"3462-412345",email:"maria.gonzalez@gmail.com",direccion:"San Martín 456, Venado Tuerto",tipo:"Particular",etiqueta:"Recurrente",notas:"Prefiere WhatsApp. Cliente desde 2024.",creado:"2024-11-15"},
-    {id:2,nombre:"Constructora Palmero S.A.",telefono:"3462-498765",email:"info@palmero.com.ar",direccion:"Av. Pellegrini 1200, Venado Tuerto",tipo:"Empresa",etiqueta:"VIP",notas:"Obras integrales frecuentes. Pago a 30 días.",creado:"2024-08-20"},
-    {id:3,nombre:"Arq. Lucas Ferreira",telefono:"3462-356789",email:"lucas@estudioferreira.com",direccion:"Belgrano 890, Venado Tuerto",tipo:"Arquitecto",etiqueta:"Recurrente",notas:"Proyectos residenciales/comerciales.",creado:"2025-03-01"},
+    {id:2,nombre:"Constructora Palmero S.A.",telefono:"3462-498765",email:"info@palmero.com.ar",direccion:"Av. Pellegrini 1200, Venado Tuerto",tipo:"Empresa",etiqueta:"VIP",notas:"Obras integrales. Pago a 30 días.",creado:"2024-08-20"},
+    {id:3,nombre:"Arq. Lucas Ferreira",telefono:"3462-356789",email:"lucas@estudioferreira.com",direccion:"Belgrano 890, Venado Tuerto",tipo:"Arquitecto",etiqueta:"Recurrente",notas:"Proyectos residenciales y comerciales.",creado:"2025-03-01"},
     {id:4,nombre:"Roberto Díaz",telefono:"3462-445678",email:"roberto.diaz@gmail.com",direccion:"Rivadavia 340, Venado Tuerto",tipo:"Particular",etiqueta:"Nuevo",notas:"Interesado en cortinas blackout.",creado:"2026-03-10"},
     {id:5,nombre:"Distribuidora Sur S.R.L.",telefono:"3462-501234",email:"ventas@distrisur.com.ar",direccion:"Ruta 8 Km 342, Armstrong",tipo:"Distribuidor",etiqueta:"VIP",notas:"Compras mayoristas mensuales.",creado:"2024-06-05"},
   ],
@@ -73,14 +163,12 @@ const INIT={
     {id:3,titulo:"Solicitar stock de Screen 120cm al proveedor",prioridad:"Media",tipo:"Interno",estado:"Pendiente",vencimiento:"2026-03-16",notas:""},
     {id:4,titulo:"Coordinar instalación Palmero con Carlos R.",prioridad:"Alta",tipo:"Obra",estado:"Pendiente",vencimiento:"2026-03-15",notas:"9hs en edificio"},
     {id:5,titulo:"Publicar foto trabajo terminado Ríos en Instagram",prioridad:"Baja",tipo:"Marketing",estado:"Pendiente",vencimiento:"2026-03-18",notas:""},
-    {id:6,titulo:"Seguimiento presupuesto Fernanda López (vence 24/03)",prioridad:"Media",tipo:"Seguimiento",estado:"Pendiente",vencimiento:"2026-03-20",notas:""},
+    {id:6,titulo:"Seguimiento presupuesto Fernanda López",prioridad:"Media",tipo:"Seguimiento",estado:"Pendiente",vencimiento:"2026-03-20",notas:""},
     {id:7,titulo:"Actualizar catálogo con nuevos modelos SPC",prioridad:"Baja",tipo:"Interno",estado:"Pendiente",vencimiento:"2026-03-25",notas:""},
   ],
 };
-
-/* ═══════════════════════════════
-   CONSTANTS
-═══════════════════════════════ */
+ 
+/* ─── CONSTANTS ─── */
 const ETAPAS=["Nuevo contacto","Visita/Medición","Presupuesto enviado","Negociación","Ganado","Perdido"];
 const ORIGENES=["WhatsApp","Instagram","Web","Referido","Showroom","Otro"];
 const PRODUCTOS=["Cortinas Roller Blackout","Cortinas Roller Screen","Cortinas Dobles","Bandas Verticales","Americanas Aluminio","Pisos Vinílicos SPC","Piso Melamínico","Deck WPC","Siding WPC","Revestimiento WPC Pared","Cielorraso PVC","Toldos Exterior","Motorización Cortinas","Obra integral","Otro"];
@@ -89,94 +177,92 @@ const ETIQ_CLI=["Nuevo","Recurrente","VIP","Arquitecto/Diseñador"];
 const EST_OBRA=["Pendiente de materiales","En instalación","Terminada","Cobrada"];
 const EST_PPTO=["Borrador","Enviado","Aprobado","Rechazado","Vencido"];
 const TIPOS_TAREA=["Seguimiento","Presupuesto","Obra","Interno","Marketing"];
-
-/* ═══════════════════════════════
-   HELPERS
-═══════════════════════════════ */
+const AUTO_REFRESH_MS = 45000; // 45 segundos
+ 
+/* ─── HELPERS ─── */
 const nid=()=>Date.now()+Math.floor(Math.random()*9999);
 const hoy=()=>new Date().toISOString().slice(0,10);
 const enDias=d=>new Date(Date.now()+d*86400000).toISOString().slice(0,10);
 const pesos=n=>new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(n||0);
 const totalP=p=>(p.items||[]).reduce((s,i)=>s+i.cant*i.precio,0);
 const nnum=pp=>`PPTO-2026-0${String(pp.length+16).padStart(2,'0')}`;
-const str=v=>String(v||'');
-const num=v=>Number(v)||0;
-
+const s=v=>String(v||'');
+const n=v=>Number(v)||0;
+const si=v=>s(v).toLowerCase()==='sí'||s(v).toLowerCase()==='si';
+const hora=()=>new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+ 
 function useLs(key,init){
-  const [v,setV]=useState(()=>{try{const s=localStorage.getItem(key);return s?JSON.parse(s):init;}catch{return init;}});
+  const [v,setV]=useState(()=>{try{const x=localStorage.getItem(key);return x?JSON.parse(x):init;}catch{return init;}});
   useEffect(()=>{try{localStorage.setItem(key,JSON.stringify(v));}catch{}},[key,v]);
   return [v,setV];
 }
-
-/* ═══════════════════════════════
-   GOOGLE SHEETS API LAYER
-═══════════════════════════════ */
-// ── Serializadores (objeto → fila) ──
-const toRowCliente  = c=>[c.id,c.nombre,c.telefono,c.email,c.direccion,c.tipo,c.etiqueta,c.notas,c.creado];
-const toRowLead     = l=>[l.id,l.clienteNombre,l.telefono,l.origen,l.producto,l.etapa,l.valor,l.fechaSeguimiento,l.notas,l.creado];
-const toRowPpto     = p=>[p.numero,p.clienteNombre,p.fecha,p.vencimiento,p.estado,(p.items||[]).length,totalP(p),p.condPago];
-const toRowItem     = (num,it,i)=>[num,i+1,it.desc,it.cant,it.precio,it.cant*it.precio];
-const toRowObra     = o=>[o.id,o.clienteNombre,o.producto,o.estado,o.fechaInstalacion,o.instalador,o.presupuesto,o.checklist.medicion?'Sí':'No',o.checklist.material?'Sí':'No',o.checklist.instalacion?'Sí':'No',o.checklist.cobro?'Sí':'No',o.observaciones];
-const toRowTarea    = t=>[t.id,t.titulo,t.prioridad,t.tipo,t.estado,t.vencimiento,t.notas];
-
-// ── Deserializadores (fila → objeto) ──
-const si=v=>str(v).toLowerCase()==='sí'||str(v).toLowerCase()==='si';
-
-function fromRowCliente(r){return{id:num(r[0])||nid(),nombre:str(r[1]),telefono:str(r[2]),email:str(r[3]),direccion:str(r[4]),tipo:str(r[5])||'Particular',etiqueta:str(r[6])||'Nuevo',notas:str(r[7]),creado:str(r[8])};}
-function fromRowLead(r){return{id:num(r[0])||nid(),clienteNombre:str(r[1]),telefono:str(r[2]),origen:str(r[3]),producto:str(r[4]),etapa:str(r[5])||'Nuevo contacto',valor:num(r[6]),fechaSeguimiento:str(r[7]),notas:str(r[8]),creado:str(r[9])};}
-function fromRowObra(r){return{id:num(r[0])||nid(),clienteNombre:str(r[1]),producto:str(r[2]),estado:str(r[3]),fechaInstalacion:str(r[4]),instalador:str(r[5]),presupuesto:str(r[6]),checklist:{medicion:si(r[7]),material:si(r[8]),instalacion:si(r[9]),cobro:si(r[10])},observaciones:str(r[11])};}
-function fromRowTarea(r){return{id:num(r[0])||nid(),titulo:str(r[1]),prioridad:str(r[2])||'Media',tipo:str(r[3])||'Interno',estado:str(r[4])||'Pendiente',vencimiento:str(r[5]),notas:str(r[6])};}
-
-function fromRowsPptos(pRows,iRows){
-  const map={};
-  (iRows||[]).forEach(r=>{const n=str(r[0]);if(!map[n])map[n]=[];map[n].push({id:nid(),desc:str(r[2]),cant:num(r[3]),precio:num(r[4])});});
-  return (pRows||[]).map(r=>({id:nid(),numero:str(r[0]),clienteNombre:str(r[1]),fecha:str(r[2]),vencimiento:str(r[3]),estado:str(r[4])||'Borrador',items:map[str(r[0])]||[{id:nid(),desc:'',cant:1,precio:0}],condPago:str(r[7])}));
+function useIsMobile(){
+  const [mob,setMob]=useState(()=>window.innerWidth<768);
+  useEffect(()=>{
+    const fn=()=>setMob(window.innerWidth<768);
+    window.addEventListener('resize',fn,{passive:true});
+    return ()=>window.removeEventListener('resize',fn);
+  },[]);
+  return mob;
 }
-
-// ── API calls ──
-async function sheetsLoad(url){
-  const resp=await fetch(url+'?t='+Date.now());
-  if(!resp.ok)throw new Error('Error HTTP '+resp.status);
-  const j=await resp.json();
-  if(!j.ok)throw new Error(j.error||'Error desconocido');
-  const d=j.data;
-  return {
-    clientes: (d.Clientes||[]).map(fromRowCliente),
-    leads:    (d.Leads||[]).map(fromRowLead),
-    presupuestos: fromRowsPptos(d.Presupuestos,d.Items_Presupuesto),
-    obras:    (d.Obras||[]).map(fromRowObra),
-    tareas:   (d.Tareas||[]).map(fromRowTarea),
+ 
+/* ─── SHEETS API ─── */
+const toRowCliente  =c=>[c.id,c.nombre,c.telefono,c.email,c.direccion,c.tipo,c.etiqueta,c.notas,c.creado];
+const toRowLead     =l=>[l.id,l.clienteNombre,l.telefono,l.origen,l.producto,l.etapa,l.valor,l.fechaSeguimiento,l.notas,l.creado];
+const toRowPpto     =p=>[p.numero,p.clienteNombre,p.fecha,p.vencimiento,p.estado,(p.items||[]).length,totalP(p),p.condPago];
+const toRowItem     =(num,it,i)=>[num,i+1,it.desc,it.cant,it.precio,it.cant*it.precio];
+const toRowObra     =o=>[o.id,o.clienteNombre,o.producto,o.estado,o.fechaInstalacion,o.instalador,o.presupuesto,o.checklist.medicion?'Sí':'No',o.checklist.material?'Sí':'No',o.checklist.instalacion?'Sí':'No',o.checklist.cobro?'Sí':'No',o.observaciones];
+const toRowTarea    =t=>[t.id,t.titulo,t.prioridad,t.tipo,t.estado,t.vencimiento,t.notas];
+const fromRC=r=>({id:n(r[0])||nid(),nombre:s(r[1]),telefono:s(r[2]),email:s(r[3]),direccion:s(r[4]),tipo:s(r[5])||'Particular',etiqueta:s(r[6])||'Nuevo',notas:s(r[7]),creado:s(r[8])});
+const fromRL=r=>({id:n(r[0])||nid(),clienteNombre:s(r[1]),telefono:s(r[2]),origen:s(r[3]),producto:s(r[4]),etapa:s(r[5])||'Nuevo contacto',valor:n(r[6]),fechaSeguimiento:s(r[7]),notas:s(r[8]),creado:s(r[9])});
+const fromRO=r=>({id:n(r[0])||nid(),clienteNombre:s(r[1]),producto:s(r[2]),estado:s(r[3]),fechaInstalacion:s(r[4]),instalador:s(r[5]),presupuesto:s(r[6]),checklist:{medicion:si(r[7]),material:si(r[8]),instalacion:si(r[9]),cobro:si(r[10])},observaciones:s(r[11])});
+const fromRT=r=>({id:n(r[0])||nid(),titulo:s(r[1]),prioridad:s(r[2])||'Media',tipo:s(r[3])||'Interno',estado:s(r[4])||'Pendiente',vencimiento:s(r[5]),notas:s(r[6])});
+function fromRPptos(pRows,iRows){
+  const map={};
+  (iRows||[]).forEach(r=>{const k=s(r[0]);if(!map[k])map[k]=[];map[k].push({id:nid(),desc:s(r[2]),cant:n(r[3]),precio:n(r[4])});});
+  return (pRows||[]).map(r=>({id:nid(),numero:s(r[0]),clienteNombre:s(r[1]),fecha:s(r[2]),vencimiento:s(r[3]),estado:s(r[4])||'Borrador',items:map[s(r[0])]||[{id:nid(),desc:'',cant:1,precio:0}],condPago:s(r[7])}));
+}
+function parseSheets(d){
+  return{
+    clientes:(d.Clientes||[]).map(fromRC),
+    leads:(d.Leads||[]).map(fromRL),
+    presupuestos:fromRPptos(d.Presupuestos,d.Items_Presupuesto),
+    obras:(d.Obras||[]).map(fromRO),
+    tareas:(d.Tareas||[]).map(fromRT),
+    lastModified:d._lastModified||'',
   };
 }
-
+async function sheetsLoad(url){
+  const r=await fetch(url+'?t='+Date.now());
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  const j=await r.json();
+  if(!j.ok)throw new Error(j.error||'Error');
+  return parseSheets(j.data);
+}
 async function sheetsSetup(url){
-  const resp=await fetch(url,{method:'POST',body:JSON.stringify({action:'setup'})});
-  if(!resp.ok)throw new Error('Error HTTP '+resp.status);
-  const j=await resp.json();
-  if(!j.ok)throw new Error(j.error||'Error al configurar');
+  const r=await fetch(url,{method:'POST',body:JSON.stringify({action:'setup'})});
+  const j=await r.json();
+  if(!j.ok)throw new Error(j.error);
   return j;
 }
-
 async function sheetsSave(url,clientes,leads,presupuestos,obras,tareas){
   const items=presupuestos.flatMap(p=>(p.items||[]).map((it,i)=>toRowItem(p.numero,it,i)));
-  const data={
+  const ts=new Date().toISOString();
+  const r=await fetch(url,{method:'POST',body:JSON.stringify({action:'save',timestamp:ts,data:{
     Clientes:clientes.map(toRowCliente),
     Leads:leads.map(toRowLead),
     Presupuestos:presupuestos.map(toRowPpto),
     Items_Presupuesto:items,
     Obras:obras.map(toRowObra),
     Tareas:tareas.map(toRowTarea),
-  };
-  const resp=await fetch(url,{method:'POST',body:JSON.stringify({action:'save',data})});
-  if(!resp.ok)throw new Error('Error HTTP '+resp.status);
-  const j=await resp.json();
-  if(!j.ok)throw new Error(j.error||'Error al guardar');
-  return j;
+  }})});
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  const j=await r.json();
+  if(!j.ok)throw new Error(j.error);
+  return ts;
 }
-
-/* ═══════════════════════════════
-   COLORS
-═══════════════════════════════ */
+ 
+/* ─── COLORS ─── */
 const C={
   etapa:{"Nuevo contacto":"bg-slate-100 text-slate-600","Visita/Medición":"bg-blue-100 text-blue-700","Presupuesto enviado":"bg-amber-100 text-amber-700","Negociación":"bg-orange-100 text-orange-700","Ganado":"bg-green-100 text-green-700","Perdido":"bg-red-100 text-red-600"},
   obra:{"Pendiente de materiales":"bg-amber-100 text-amber-700","En instalación":"bg-blue-100 text-blue-700","Terminada":"bg-teal-100 text-teal-700","Cobrada":"bg-green-100 text-green-700"},
@@ -187,158 +273,128 @@ const C={
   tcli:{"Particular":"bg-blue-50 text-blue-600","Empresa":"bg-indigo-50 text-indigo-600","Arquitecto":"bg-violet-50 text-violet-600","Distribuidor":"bg-teal-50 text-teal-600"},
 };
 const TICON={Particular:"👤",Empresa:"🏢",Arquitecto:"📐",Distribuidor:"🚚"};
-
-/* ═══════════════════════════════
-   BASE UI COMPONENTS
-═══════════════════════════════ */
+ 
+/* ─── BASE UI ─── */
 function Badge({text,cls}){return <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${cls||"bg-slate-100 text-slate-600"}`}>{text}</span>;}
-
+function Spinner({size=4}){return <svg className={`spin w-${size} h-${size}`} fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>;}
+ 
 function Modal({title,onClose,children,size="md"}){
   const w=size==="lg"?"max-w-3xl":"max-w-xl";
   return(
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4 fade-in" onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
-      <div className={`bg-white rounded-2xl shadow-2xl w-full ${w} max-h-[90vh] overflow-y-auto`}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-          <h3 className="font-bold text-slate-800 text-lg">{title}</h3>
-          <button onClick={onClose} className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition">✕</button>
+    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 modal-overlay" style={{alignItems:'flex-end'}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+      <div className={`bg-white w-full ${w} modal-box`} style={{borderRadius:'20px 20px 0 0',maxHeight:'92vh',overflowY:'auto',animation:'modalUp .3s cubic-bezier(.33,1,.68,1)'}}>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+          <h3 className="font-bold text-slate-800 text-base">{title}</h3>
+          <button onClick={onClose} className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition text-sm flex-shrink-0">✕</button>
         </div>
-        <div className="px-6 py-5">{children}</div>
+        <div className="px-5 py-5" style={{paddingBottom:'calc(20px + env(safe-area-inset-bottom))'}}>{children}</div>
       </div>
     </div>
   );
 }
-function FI({label,...p}){return(<div className="mb-4"><label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">{label}</label><input className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 bg-white focus:border-teal-400" {...p}/></div>);}
-function FS({label,opts,...p}){return(<div className="mb-4"><label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">{label}</label><select className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 bg-white focus:border-teal-400" {...p}>{opts.map(o=><option key={o}>{o}</option>)}</select></div>);}
-function FT({label,...p}){return(<div className="mb-4"><label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">{label}</label><textarea rows={3} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 bg-white focus:border-teal-400 resize-none" {...p}/></div>);}
+function FI({label,...p}){return <div className="mb-4"><label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">{label}</label><input className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 bg-white focus:border-teal-400" {...p}/></div>;}
+function FS({label,opts,...p}){return <div className="mb-4"><label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">{label}</label><select className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 bg-white focus:border-teal-400" {...p}>{opts.map(o=><option key={o}>{o}</option>)}</select></div>;}
+function FT({label,...p}){return <div className="mb-4"><label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">{label}</label><textarea rows={3} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 bg-white focus:border-teal-400 resize-none" {...p}/></div>;}
 function Btn({children,variant="primary",className="",...p}){
-  const vs={primary:"bg-teal-600 text-white hover:bg-teal-700",secondary:"bg-slate-100 text-slate-700 hover:bg-slate-200",danger:"bg-red-500 text-white hover:bg-red-600",ghost:"text-teal-600 hover:text-teal-800"};
+  const vs={primary:"bg-teal-600 text-white hover:bg-teal-700",secondary:"bg-slate-100 text-slate-700 hover:bg-slate-200",danger:"bg-red-500 text-white hover:bg-red-600"};
   return <button className={`px-4 py-2 text-sm rounded-lg font-medium transition ${vs[variant]} ${className}`} {...p}>{children}</button>;
 }
-
-/* ═══════════════════════════════
-   SETUP SCREEN
-═══════════════════════════════ */
+ 
+/* ─── SETUP SCREEN ─── */
 function SetupScreen({onConnect}){
   const [url,setUrl]=useState('');
   const [loading,setLoading]=useState(false);
-  const [error,setError]=useState('');
-
+  const [err,setErr]=useState('');
   async function connect(){
-    if(!url.trim()||!url.includes('script.google.com')){setError('Ingresá una URL válida de Google Apps Script.');return;}
-    setLoading(true);setError('');
-    try{
-      await sheetsSetup(url.trim());
-      onConnect(url.trim());
-    }catch(e){setError('No se pudo conectar: '+e.message+'. Verificá la URL y que el script esté publicado correctamente.');}
+    if(!url.includes('script.google.com')){setErr('Ingresá una URL válida de Apps Script.');return;}
+    setLoading(true);setErr('');
+    try{await sheetsSetup(url.trim());onConnect(url.trim());}
+    catch(e){setErr('No se pudo conectar: '+e.message);}
     finally{setLoading(false);}
   }
-
   return(
     <div className="min-h-screen bg-slate-900 flex items-center justify-center p-6">
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 fade-in">
         <div className="text-center mb-8">
           <div className="text-5xl mb-4">🟢</div>
           <h1 className="text-2xl font-black text-slate-900 syne">GRUPO VIEW CRM</h1>
-          <p className="text-slate-500 text-sm mt-2">Conectá con Google Sheets para guardar tus datos en la nube</p>
+          <p className="text-slate-500 text-sm mt-2">Conectá con Google Sheets para sincronizar datos entre todos los usuarios</p>
         </div>
-
-        <div className="bg-slate-50 rounded-2xl p-5 mb-6">
-          <h3 className="font-semibold text-slate-700 text-sm mb-3">📋 ¿Cómo obtener la URL?</h3>
-          <ol className="text-xs text-slate-500 space-y-2">
-            <li className="flex gap-2"><span className="bg-teal-500 text-white rounded-full w-4 h-4 flex items-center justify-center flex-shrink-0 font-bold text-xs">1</span>Abrí el archivo de instrucciones incluido</li>
-            <li className="flex gap-2"><span className="bg-teal-500 text-white rounded-full w-4 h-4 flex items-center justify-center flex-shrink-0 font-bold text-xs">2</span>Seguí los 4 pasos para crear el Apps Script</li>
-            <li className="flex gap-2"><span className="bg-teal-500 text-white rounded-full w-4 h-4 flex items-center justify-center flex-shrink-0 font-bold text-xs">3</span>Copiá la URL de la aplicación web y pegala acá</li>
-          </ol>
+        <div className="bg-slate-50 rounded-2xl p-4 mb-6 text-xs text-slate-500 space-y-1.5">
+          <p className="font-semibold text-slate-700 text-sm mb-2">📋 Cómo obtener la URL</p>
+          <p>1. Seguí las instrucciones del archivo <code className="bg-slate-200 px-1 rounded">INSTRUCCIONES_GitHub_Pages.txt</code></p>
+          <p>2. Publicá el Apps Script y copiá la URL</p>
+          <p>3. Pegala acá abajo</p>
         </div>
-
         <div className="mb-4">
           <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">URL del Apps Script</label>
-          <input
-            value={url}
-            onChange={e=>setUrl(e.target.value)}
-            onKeyDown={e=>e.key==='Enter'&&connect()}
-            placeholder="https://script.google.com/macros/s/..."
-            className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 bg-white focus:border-teal-400 focus:outline-none"
-          />
+          <input value={url} onChange={e=>setUrl(e.target.value)} onKeyDown={e=>e.key==='Enter'&&connect()} placeholder="https://script.google.com/macros/s/..." className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 bg-white focus:border-teal-400 focus:outline-none"/>
         </div>
-
-        {error&&<div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-4 text-xs text-red-700">{error}</div>}
-
-        <button
-          onClick={connect}
-          disabled={loading}
-          className="w-full bg-teal-600 hover:bg-teal-700 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition text-sm"
-        >
-          {loading?(
-            <span className="flex items-center justify-center gap-2">
-              <svg className="spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-              Conectando con Google Sheets...
-            </span>
-          ):'Conectar con Google Sheets →'}
+        {err&&<div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-4 text-xs text-red-700">{err}</div>}
+        <button onClick={connect} disabled={loading} className="w-full bg-teal-600 hover:bg-teal-700 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition text-sm flex items-center justify-center gap-2">
+          {loading?<><Spinner/> Conectando...</>:'Conectar con Google Sheets →'}
         </button>
-
-        <p className="text-center text-xs text-slate-400 mt-4">
-          Esta configuración se guarda en tu navegador.<br/>No necesitás repetirla cada vez.
-        </p>
+        <p className="text-center text-xs text-slate-400 mt-4">Esta configuración se guarda en el navegador.<br/>No necesitás repetirla.</p>
       </div>
     </div>
   );
 }
-
-/* ═══════════════════════════════
-   LOADING SCREEN
-═══════════════════════════════ */
+ 
+/* ─── LOADING ─── */
 function LoadingScreen({msg}){
   return(
     <div className="min-h-screen bg-slate-900 flex items-center justify-center">
       <div className="text-center">
-        <div className="text-4xl mb-4">
-          <svg className="spin w-12 h-12 text-teal-400 mx-auto" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"/>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-          </svg>
-        </div>
-        <p className="text-white font-semibold syne">GRUPO VIEW CRM</p>
-        <p className="text-slate-400 text-sm mt-2">{msg||'Cargando datos desde Google Sheets...'}</p>
+        <Spinner size={12}/>
+        <p className="text-white font-bold syne mt-4">GRUPO VIEW CRM</p>
+        <p className="text-slate-400 text-sm mt-2">{msg||'Cargando...'}</p>
       </div>
     </div>
   );
 }
-
-/* ═══════════════════════════════
-   CLOUD SYNC BAR
-═══════════════════════════════ */
-function CloudSyncBar({syncStatus,lastSync,onManualSave,onDisconnect}){
-  const configs={
-    idle:    {dot:"bg-green-400", bg:"bg-green-50 border-green-200", text:"text-green-800", msg:lastSync?`✓ Sincronizado · ${lastSync}`:"Conectado a Google Sheets"},
-    saving:  {dot:"bg-amber-400 pulse", bg:"bg-amber-50 border-amber-200", text:"text-amber-800", msg:"Guardando en Google Sheets..."},
-    pending: {dot:"bg-amber-400", bg:"bg-amber-50 border-amber-200", text:"text-amber-800", msg:"Cambios pendientes de guardar"},
-    error:   {dot:"bg-red-400", bg:"bg-red-50 border-red-200", text:"text-red-800", msg:"Error al guardar · Verificá tu conexión"},
-  };
-  const cfg=configs[syncStatus]||configs.idle;
+ 
+/* ─── CONFLICT BANNER ─── */
+function ConflictBanner({onRefresh,who}){
   return(
-    <div className={`flex items-center gap-3 px-4 py-2.5 border-b ${cfg.bg}`}>
-      <div className={`sync-dot ${cfg.dot}`}/>
-      <span className={`text-sm flex-1 font-medium ${cfg.text}`}>{cfg.msg}</span>
-      <span className="text-xs text-slate-400 hidden sm:inline">📊 Google Sheets</span>
-      {syncStatus==='pending'&&<button onClick={onManualSave} className="text-xs bg-teal-600 text-white px-3 py-1.5 rounded-lg hover:bg-teal-700 transition">Guardar ahora</button>}
-      {syncStatus==='error'&&<button onClick={onManualSave} className="text-xs bg-red-500 text-white px-3 py-1.5 rounded-lg hover:bg-red-600 transition">Reintentar</button>}
-      <button onClick={onDisconnect} className="text-xs text-slate-400 hover:text-slate-600 transition" title="Desconectar">⚙️</button>
+    <div className="slide-down bg-orange-500 text-white px-4 py-2.5 flex items-center gap-3 text-sm">
+      <span className="text-lg">⚠️</span>
+      <span className="flex-1 font-medium">Hay cambios más recientes en Google Sheets. Actualizá para no perder datos.</span>
+      <button onClick={onRefresh} className="bg-white text-orange-600 font-bold text-xs px-4 py-1.5 rounded-lg hover:bg-orange-50 transition flex-shrink-0">
+        Actualizar ahora
+      </button>
     </div>
   );
 }
-
-/* ═══════════════════════════════
-   DASHBOARD
-═══════════════════════════════ */
+ 
+/* ─── SYNC BAR ─── */
+function SyncBar({status,lastSync,pendingCount,onSave,onDisconnect}){
+  const cfgs={
+    idle:    {dot:"bg-green-400",bg:"bg-green-50 border-green-200",txt:"text-green-800",msg:lastSync?`✓ Sincronizado · ${lastSync}`:"Conectado a Google Sheets"},
+    checking:{dot:"bg-blue-400 pulse",bg:"bg-blue-50 border-blue-200",txt:"text-blue-800",msg:"Verificando cambios de otros usuarios..."},
+    saving:  {dot:"bg-amber-400 pulse",bg:"bg-amber-50 border-amber-200",txt:"text-amber-800",msg:"Guardando en Google Sheets..."},
+    pending: {dot:"bg-amber-400",bg:"bg-amber-50 border-amber-200",txt:"text-amber-800",msg:`${pendingCount} cambio(s) sin guardar`},
+    error:   {dot:"bg-red-400",bg:"bg-red-50 border-red-200",txt:"text-red-800",msg:"Error al guardar · Verificá tu conexión"},
+  };
+  const c=cfgs[status]||cfgs.idle;
+  return(
+    <div className={`flex items-center gap-3 px-4 py-2 border-b ${c.bg} text-sm`}>
+      <div className={`sync-dot ${c.dot}`}/>
+      <span className={`flex-1 font-medium ${c.txt}`}>{c.msg}</span>
+      <span className="text-xs text-slate-400 hidden md:inline">📊 Google Sheets · Auto-sync 45s</span>
+      {status==='pending'&&<button onClick={onSave} className="text-xs bg-teal-600 text-white px-3 py-1 rounded-lg hover:bg-teal-700 transition">Guardar ya</button>}
+      {status==='error'&&<button onClick={onSave} className="text-xs bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition">Reintentar</button>}
+      <button onClick={onDisconnect} className="text-slate-400 hover:text-slate-600 transition text-sm" title="Configuración">⚙️</button>
+    </div>
+  );
+}
+ 
+/* ─── DASHBOARD ─── */
 function Dashboard({clientes,leads,presupuestos,obras,tareas,setSeccion}){
   const activos=leads.filter(l=>!["Ganado","Perdido"].includes(l.etapa));
   const pipeline=activos.reduce((s,l)=>s+(l.valor||0),0);
-  const cerradas=leads.filter(l=>l.etapa==="Ganado").length;
-  const tasa=leads.length>0?Math.round((cerradas/leads.length)*100):0;
-  const pptosPend=presupuestos.filter(p=>["Enviado","Borrador"].includes(p.estado));
-  const obrasCurso=obras.filter(o=>o.estado!=="Cobrada");
+  const tasa=leads.length>0?Math.round((leads.filter(l=>l.etapa==="Ganado").length/leads.length)*100):0;
   const tareasAltas=tareas.filter(t=>t.estado==="Pendiente"&&t.prioridad==="Alta");
+  const obrasCurso=obras.filter(o=>o.estado!=="Cobrada");
   return(
     <div className="fade-in">
       <div className="mb-6">
@@ -348,7 +404,7 @@ function Dashboard({clientes,leads,presupuestos,obras,tareas,setSeccion}){
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[{icon:"👥",label:"Clientes",val:clientes.length,color:"bg-blue-50 border-blue-100",sec:"clientes"},
           {icon:"🔥",label:"Leads activos",val:activos.length,color:"bg-orange-50 border-orange-100",sec:"leads"},
-          {icon:"📋",label:"Presupuestos pend.",val:pptosPend.length,color:"bg-amber-50 border-amber-100",sec:"presupuestos"},
+          {icon:"📋",label:"Presupuestos pend.",val:presupuestos.filter(p=>["Enviado","Borrador"].includes(p.estado)).length,color:"bg-amber-50 border-amber-100",sec:"presupuestos"},
           {icon:"🏗️",label:"Obras en curso",val:obrasCurso.length,color:"bg-teal-50 border-teal-100",sec:"obras"},
         ].map(k=>(
           <button key={k.label} onClick={()=>setSeccion(k.sec)} className={`${k.color} border rounded-xl p-4 text-left hover:shadow-md transition card-hover w-full`}>
@@ -371,13 +427,11 @@ function Dashboard({clientes,leads,presupuestos,obras,tareas,setSeccion}){
           {ETAPAS.filter(e=>!["Ganado","Perdido"].includes(e)).map(e=>{
             const cnt=leads.filter(l=>l.etapa===e).length;
             const pct=leads.length>0?(cnt/leads.length)*100:0;
-            return(
-              <div key={e} className="flex items-center gap-3 text-sm mb-2">
-                <span className="text-slate-400 text-xs w-36">{e}</span>
-                <div className="flex-1 bg-slate-700 rounded-full h-1.5"><div className="bg-teal-400 h-1.5 rounded-full transition-all" style={{width:`${pct}%`}}></div></div>
-                <span className="text-slate-400 text-xs w-4 text-right">{cnt}</span>
-              </div>
-            );
+            return <div key={e} className="flex items-center gap-3 text-sm mb-2">
+              <span className="text-slate-400 text-xs w-36">{e}</span>
+              <div className="flex-1 bg-slate-700 rounded-full h-1.5"><div className="bg-teal-400 h-1.5 rounded-full" style={{width:`${pct}%`}}/></div>
+              <span className="text-slate-400 text-xs w-4 text-right">{cnt}</span>
+            </div>;
           })}
         </div>
         <div className="bg-white border border-slate-100 rounded-xl p-5">
@@ -396,46 +450,31 @@ function Dashboard({clientes,leads,presupuestos,obras,tareas,setSeccion}){
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <div className="bg-white border border-slate-100 rounded-xl p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-slate-700 text-sm">🏗️ Obras activas</h3>
-            <button onClick={()=>setSeccion("obras")} className="text-xs text-teal-600 hover:underline">Ver todas</button>
-          </div>
-          {obrasCurso.slice(0,4).map(o=>{
-            const done=Object.values(o.checklist).filter(Boolean).length;
-            return(
-              <div key={o.id} className="p-3 rounded-lg border border-slate-100 mb-2">
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <div><p className="text-sm font-medium text-slate-700">{o.clienteNombre}</p><p className="text-xs text-slate-400">{o.producto.slice(0,40)}...</p></div>
-                  <Badge text={o.estado} cls={C.obra[o.estado]}/>
-                </div>
-                <div className="bg-slate-100 rounded-full h-1.5"><div className="bg-teal-500 h-1.5 rounded-full" style={{width:`${(done/4)*100}%`}}></div></div>
-                <div className="text-xs text-slate-400 mt-1">{done}/4 pasos · {o.fechaInstalacion}</div>
-              </div>
-            );
-          })}
+          <div className="flex items-center justify-between mb-4"><h3 className="font-bold text-slate-700 text-sm">🏗️ Obras activas</h3><button onClick={()=>setSeccion("obras")} className="text-xs text-teal-600 hover:underline">Ver todas</button></div>
+          {obrasCurso.slice(0,4).map(o=>{const done=Object.values(o.checklist).filter(Boolean).length;return(
+            <div key={o.id} className="p-3 rounded-lg border border-slate-100 mb-2">
+              <div className="flex items-start justify-between gap-2 mb-2"><div><p className="text-sm font-medium text-slate-700">{o.clienteNombre}</p><p className="text-xs text-slate-400">{o.producto.slice(0,40)}</p></div><Badge text={o.estado} cls={C.obra[o.estado]}/></div>
+              <div className="bg-slate-100 rounded-full h-1.5"><div className="bg-teal-500 h-1.5 rounded-full" style={{width:`${(done/4)*100}%`}}/></div>
+              <div className="text-xs text-slate-400 mt-1">{done}/4 · {o.fechaInstalacion}</div>
+            </div>
+          );})}
           {obrasCurso.length===0&&<p className="text-slate-400 text-sm">Sin obras activas</p>}
         </div>
         <div className="bg-white border border-slate-100 rounded-xl p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-slate-700 text-sm">💰 Leads en negociación</h3>
-            <button onClick={()=>setSeccion("leads")} className="text-xs text-teal-600 hover:underline">Ver todos</button>
-          </div>
+          <div className="flex items-center justify-between mb-4"><h3 className="font-bold text-slate-700 text-sm">💰 Leads en negociación</h3><button onClick={()=>setSeccion("leads")} className="text-xs text-teal-600 hover:underline">Ver todos</button></div>
           {leads.filter(l=>["Negociación","Presupuesto enviado"].includes(l.etapa)).slice(0,4).map(l=>(
             <div key={l.id} className="flex items-center gap-3 p-3 rounded-lg border border-slate-100 mb-2">
               <div className="flex-1 min-w-0"><p className="text-sm font-medium text-slate-700">{l.clienteNombre}</p><p className="text-xs text-slate-400">{l.producto}</p></div>
-              <div className="text-right flex-shrink-0"><p className="text-sm font-bold text-teal-700">{pesos(l.valor)}</p><Badge text={l.etapa} cls={C.etapa[l.etapa]}/></div>
+              <div className="text-right"><p className="text-sm font-bold text-teal-700">{pesos(l.valor)}</p><Badge text={l.etapa} cls={C.etapa[l.etapa]}/></div>
             </div>
           ))}
-          {leads.filter(l=>["Negociación","Presupuesto enviado"].includes(l.etapa)).length===0&&<p className="text-slate-400 text-sm">Sin leads en negociación</p>}
         </div>
       </div>
     </div>
   );
 }
-
-/* ═══════════════════════════════
-   CLIENTES
-═══════════════════════════════ */
+ 
+/* ─── CLIENTES ─── */
 function Clientes({clientes,setClientes}){
   const [search,setSearch]=useState('');
   const [modal,setModal]=useState(null);
@@ -446,10 +485,7 @@ function Clientes({clientes,setClientes}){
   function del(id){if(confirm('¿Eliminar cliente?'))setClientes(p=>p.filter(c=>c.id!==id));}
   return(
     <div className="fade-in">
-      <div className="flex items-center justify-between mb-5">
-        <div><h2 className="text-2xl font-bold text-slate-900 syne">Clientes</h2><p className="text-slate-500 text-sm">{clientes.length} registrados</p></div>
-        <Btn onClick={()=>{setForm(empty);setModal('add');}}>+ Nuevo cliente</Btn>
-      </div>
+      <div className="flex items-center justify-between mb-5"><div><h2 className="text-2xl font-bold text-slate-900 syne">Clientes</h2><p className="text-slate-500 text-sm">{clientes.length} registrados</p></div><Btn onClick={()=>{setForm(empty);setModal('add');}}>+ Nuevo cliente</Btn></div>
       <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar nombre, teléfono, email..." className="w-full border border-slate-200 rounded-lg px-4 py-2 text-sm bg-white focus:border-teal-400 focus:outline-none mb-4"/>
       <div className="space-y-3">
         {filtered.map(c=>(
@@ -472,121 +508,139 @@ function Clientes({clientes,setClientes}){
         ))}
         {filtered.length===0&&<div className="text-center py-16 text-slate-400">No se encontraron clientes.</div>}
       </div>
-      {modal&&(
-        <Modal title={modal==='add'?'Nuevo cliente':'Editar cliente'} onClose={()=>setModal(null)}>
-          <div className="grid grid-cols-2 gap-x-4">
-            <div className="col-span-2"><FI label="Nombre / Razón social *" value={form.nombre} onChange={e=>setForm({...form,nombre:e.target.value})}/></div>
-            <FI label="Teléfono (WhatsApp)" value={form.telefono} onChange={e=>setForm({...form,telefono:e.target.value})}/>
-            <FI label="Email" type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/>
-            <div className="col-span-2"><FI label="Dirección" value={form.direccion} onChange={e=>setForm({...form,direccion:e.target.value})}/></div>
-            <FS label="Tipo" opts={TIPOS_CLI} value={form.tipo} onChange={e=>setForm({...form,tipo:e.target.value})}/>
-            <FS label="Etiqueta" opts={ETIQ_CLI} value={form.etiqueta} onChange={e=>setForm({...form,etiqueta:e.target.value})}/>
-            <div className="col-span-2"><FT label="Notas internas" value={form.notas} onChange={e=>setForm({...form,notas:e.target.value})}/></div>
-          </div>
-          <div className="flex gap-3 justify-end"><Btn variant="secondary" onClick={()=>setModal(null)}>Cancelar</Btn><Btn onClick={save}>Guardar</Btn></div>
-        </Modal>
-      )}
+      {modal&&<Modal title={modal==='add'?'Nuevo cliente':'Editar cliente'} onClose={()=>setModal(null)}>
+        <div className="grid grid-cols-2 gap-x-4">
+          <div className="col-span-2"><FI label="Nombre / Razón social *" value={form.nombre} onChange={e=>setForm({...form,nombre:e.target.value})}/></div>
+          <FI label="Teléfono (WhatsApp)" value={form.telefono} onChange={e=>setForm({...form,telefono:e.target.value})}/>
+          <FI label="Email" type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/>
+          <div className="col-span-2"><FI label="Dirección" value={form.direccion} onChange={e=>setForm({...form,direccion:e.target.value})}/></div>
+          <FS label="Tipo" opts={TIPOS_CLI} value={form.tipo} onChange={e=>setForm({...form,tipo:e.target.value})}/>
+          <FS label="Etiqueta" opts={ETIQ_CLI} value={form.etiqueta} onChange={e=>setForm({...form,etiqueta:e.target.value})}/>
+          <div className="col-span-2"><FT label="Notas" value={form.notas} onChange={e=>setForm({...form,notas:e.target.value})}/></div>
+        </div>
+        <div className="flex gap-3 justify-end"><Btn variant="secondary" onClick={()=>setModal(null)}>Cancelar</Btn><Btn onClick={save}>Guardar</Btn></div>
+      </Modal>}
     </div>
   );
 }
-
-/* ═══════════════════════════════
-   LEADS
-═══════════════════════════════ */
+ 
+/* ─── LEADS ─── */
 function Leads({leads,setLeads}){
   const [modal,setModal]=useState(null);
   const [vista,setVista]=useState('kanban');
+  const [mobCol,setMobCol]=useState(0);
+  const isMobile=useIsMobile();
   const empty={clienteNombre:'',telefono:'',origen:'WhatsApp',producto:PRODUCTOS[0],etapa:'Nuevo contacto',fechaSeguimiento:'',notas:'',valor:''};
   const [form,setForm]=useState(empty);
-  function save(){if(!form.clienteNombre.trim())return;const d={...form,valor:num(form.valor)};if(modal==='add')setLeads(p=>[...p,{...d,id:nid(),creado:hoy()}]);else setLeads(p=>p.map(l=>l.id===modal.id?{...l,...d}:l));setModal(null);}
+  function save(){if(!form.clienteNombre.trim())return;const d={...form,valor:n(form.valor)};if(modal==='add')setLeads(p=>[...p,{...d,id:nid(),creado:hoy()}]);else setLeads(p=>p.map(l=>l.id===modal.id?{...l,...d}:l));setModal(null);}
   function del(id){if(confirm('¿Eliminar lead?'))setLeads(p=>p.filter(l=>l.id!==id));}
   function avanzar(id){setLeads(p=>p.map(l=>{if(l.id!==id)return l;const i=ETAPAS.indexOf(l.etapa);return i<ETAPAS.length-1?{...l,etapa:ETAPAS[i+1]}:l;}));}
   function retroceder(id){setLeads(p=>p.map(l=>{if(l.id!==id)return l;const i=ETAPAS.indexOf(l.etapa);return i>0?{...l,etapa:ETAPAS[i-1]}:l;}));}
   const activos=leads.filter(l=>!["Ganado","Perdido"].includes(l.etapa));
+ 
+  const KanbanCard=({l,etapa})=>(
+    <div className="bg-white border border-slate-100 rounded-xl p-3 cursor-pointer card-hover" onClick={()=>{setForm({...l,valor:String(l.valor||'')});setModal(l);}}>
+      <p className="font-semibold text-slate-800 text-sm">{l.clienteNombre}</p>
+      <p className="text-xs text-slate-500 mt-0.5">{l.producto}</p>
+      {l.valor>0&&<p className="text-sm font-bold text-teal-700 mt-1">{pesos(l.valor)}</p>}
+      <Badge text={l.origen} cls="bg-slate-100 text-slate-500 mt-1.5"/>
+      {l.fechaSeguimiento&&<p className="text-xs text-slate-400 mt-1.5">📅 {l.fechaSeguimiento}</p>}
+      {!["Ganado","Perdido"].includes(etapa)&&<div className="flex gap-2 mt-2 pt-2 border-t border-slate-50">
+        {ETAPAS.indexOf(etapa)>0&&<button onClick={e=>{e.stopPropagation();retroceder(l.id);}} className="text-xs text-slate-400 hover:text-slate-700 py-1 px-2">◀ Atrás</button>}
+        <button onClick={e=>{e.stopPropagation();avanzar(l.id);}} className="text-xs text-teal-600 hover:text-teal-800 font-semibold ml-auto py-1 px-2">Avanzar ▶</button>
+      </div>}
+    </div>
+  );
+ 
   return(
     <div className="fade-in">
-      <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <div><h2 className="text-2xl font-bold text-slate-900 syne">Leads</h2><p className="text-slate-500 text-sm">{activos.length} activos · {pesos(activos.reduce((s,l)=>s+(l.valor||0),0))} pipeline</p></div>
         <div className="flex gap-2">
-          <div className="flex bg-white border border-slate-200 rounded-lg overflow-hidden">
-            <button onClick={()=>setVista('kanban')} className={`px-3 py-1.5 text-sm transition ${vista==='kanban'?'bg-teal-600 text-white':'text-slate-600 hover:bg-slate-50'}`}>Kanban</button>
-            <button onClick={()=>setVista('lista')} className={`px-3 py-1.5 text-sm transition ${vista==='lista'?'bg-teal-600 text-white':'text-slate-600 hover:bg-slate-50'}`}>Lista</button>
-          </div>
-          <Btn onClick={()=>{setForm(empty);setModal('add');}}>+ Nuevo lead</Btn>
+          {!isMobile&&<div className="flex bg-white border border-slate-200 rounded-lg overflow-hidden">
+            <button onClick={()=>setVista('kanban')} className={`px-3 py-1.5 text-sm transition ${vista==='kanban'?'bg-teal-600 text-white':'text-slate-600'}`}>Kanban</button>
+            <button onClick={()=>setVista('lista')} className={`px-3 py-1.5 text-sm transition ${vista==='lista'?'bg-teal-600 text-white':'text-slate-600'}`}>Lista</button>
+          </div>}
+          <Btn onClick={()=>{setForm(empty);setModal('add');}}>+ Nuevo</Btn>
         </div>
       </div>
-      {vista==='kanban'?(
-        <div className="kanban-scroll">
-          <div className="kanban-board">
+ 
+      {/* ── MOBILE KANBAN: column selector tabs ── */}
+      <div className="kanban-mobile-selector mb-3">
+        {ETAPAS.map((etapa,i)=>{
+          const cnt=leads.filter(l=>l.etapa===etapa).length;
+          return <button key={etapa} onClick={()=>setMobCol(i)} className={`flex-shrink-0 px-3 py-2 rounded-full text-xs font-semibold border transition ${mobCol===i?'bg-teal-600 text-white border-teal-600':'bg-white border-slate-200 text-slate-600'}`}>
+            {etapa} {cnt>0&&<span className={`ml-1 ${mobCol===i?'text-teal-200':'text-slate-400'}`}>{cnt}</span>}
+          </button>;
+        })}
+      </div>
+      <div className="kanban-mobile-col">
+        {(()=>{
+          const etapa=ETAPAS[mobCol];
+          const col=leads.filter(l=>l.etapa===etapa);
+          const colV=col.reduce((s,l)=>s+(l.valor||0),0);
+          return <div>
+            {colV>0&&<p className="text-xs text-slate-400 mb-3">{pesos(colV)} en esta etapa</p>}
+            <div className="space-y-3">
+              {col.map(l=><KanbanCard key={l.id} l={l} etapa={etapa}/>)}
+              {col.length===0&&<div className="border-2 border-dashed border-slate-100 rounded-xl h-24 flex items-center justify-center"><span className="text-slate-300 text-sm">Sin leads en esta etapa</span></div>}
+            </div>
+          </div>;
+        })()}
+      </div>
+ 
+      {/* ── DESKTOP KANBAN ── */}
+      <div className="kanban-desktop">
+        {(vista==='kanban')?(
+          <div className="kanban-scroll"><div className="kanban-board">
             {ETAPAS.map(etapa=>{
               const col=leads.filter(l=>l.etapa===etapa);
               const colV=col.reduce((s,l)=>s+(l.valor||0),0);
-              return(
-                <div key={etapa} className="kanban-col">
-                  <div className="mb-3 px-1">
-                    <div className="flex items-center justify-between"><span className="text-xs font-bold uppercase tracking-wider text-slate-600">{etapa}</span><span className="text-xs bg-slate-200 text-slate-600 rounded-full px-2 py-0.5">{col.length}</span></div>
-                    {colV>0&&<div className="text-xs text-slate-400 mt-0.5">{pesos(colV)}</div>}
-                  </div>
-                  <div className="space-y-3">
-                    {col.map(l=>(
-                      <div key={l.id} className="bg-white border border-slate-100 rounded-xl p-3 cursor-pointer card-hover" onClick={()=>{setForm({...l,valor:String(l.valor||'')});setModal(l);}}>
-                        <p className="font-semibold text-slate-800 text-sm">{l.clienteNombre}</p>
-                        <p className="text-xs text-slate-500 mt-0.5">{l.producto}</p>
-                        {l.valor>0&&<p className="text-sm font-bold text-teal-700 mt-1">{pesos(l.valor)}</p>}
-                        <Badge text={l.origen} cls="bg-slate-100 text-slate-500 mt-1.5"/>
-                        {l.fechaSeguimiento&&<p className="text-xs text-slate-400 mt-1.5">📅 {l.fechaSeguimiento}</p>}
-                        {!["Ganado","Perdido"].includes(etapa)&&(
-                          <div className="flex gap-2 mt-2 pt-2 border-t border-slate-50">
-                            {ETAPAS.indexOf(etapa)>0&&<button onClick={e=>{e.stopPropagation();retroceder(l.id);}} className="text-xs text-slate-400 hover:text-slate-700">◀ Atrás</button>}
-                            <button onClick={e=>{e.stopPropagation();avanzar(l.id);}} className="text-xs text-teal-600 hover:text-teal-800 font-semibold ml-auto">Avanzar ▶</button>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                    {col.length===0&&<div className="border-2 border-dashed border-slate-100 rounded-xl h-16 flex items-center justify-center"><span className="text-slate-300 text-xs">Vacío</span></div>}
-                  </div>
+              return <div key={etapa} className="kanban-col">
+                <div className="mb-3 px-1">
+                  <div className="flex items-center justify-between"><span className="text-xs font-bold uppercase tracking-wider text-slate-600">{etapa}</span><span className="text-xs bg-slate-200 text-slate-600 rounded-full px-2 py-0.5">{col.length}</span></div>
+                  {colV>0&&<div className="text-xs text-slate-400 mt-0.5">{pesos(colV)}</div>}
                 </div>
-              );
+                <div className="space-y-3">
+                  {col.map(l=><KanbanCard key={l.id} l={l} etapa={etapa}/>)}
+                  {col.length===0&&<div className="border-2 border-dashed border-slate-100 rounded-xl h-16 flex items-center justify-center"><span className="text-slate-300 text-xs">Vacío</span></div>}
+                </div>
+              </div>;
             })}
-          </div>
-        </div>
-      ):(
-        <div className="space-y-3">
-          {leads.map(l=>(
+          </div></div>
+        ):(
+          <div className="space-y-3">{leads.map(l=>(
             <div key={l.id} className="bg-white border border-slate-100 rounded-xl p-4 card-hover cursor-pointer" onClick={()=>{setForm({...l,valor:String(l.valor||'')});setModal(l);}}>
               <div className="flex items-start justify-between gap-3">
                 <div><div className="flex items-center gap-2 flex-wrap mb-1"><p className="font-semibold text-slate-800">{l.clienteNombre}</p><Badge text={l.etapa} cls={C.etapa[l.etapa]}/><Badge text={l.origen} cls="bg-slate-100 text-slate-500"/></div><p className="text-sm text-slate-500">{l.producto}</p>{l.fechaSeguimiento&&<p className="text-xs text-slate-400 mt-1">📅 {l.fechaSeguimiento}</p>}</div>
                 {l.valor>0&&<p className="text-lg font-bold text-teal-700 flex-shrink-0">{pesos(l.valor)}</p>}
               </div>
             </div>
-          ))}
+          ))}</div>
+        )}
+      </div>
+ 
+      {modal&&<Modal title={modal==='add'?'Nuevo lead':'Editar lead'} onClose={()=>setModal(null)}>
+        <div className="grid grid-cols-2 gap-x-4">
+          <FI label="Nombre del contacto *" value={form.clienteNombre} onChange={e=>setForm({...form,clienteNombre:e.target.value})}/>
+          <FI label="Teléfono" value={form.telefono} onChange={e=>setForm({...form,telefono:e.target.value})}/>
+          <FS label="Origen" opts={ORIGENES} value={form.origen} onChange={e=>setForm({...form,origen:e.target.value})}/>
+          <FS label="Producto" opts={PRODUCTOS} value={form.producto} onChange={e=>setForm({...form,producto:e.target.value})}/>
+          <FS label="Etapa" opts={ETAPAS} value={form.etapa} onChange={e=>setForm({...form,etapa:e.target.value})}/>
+          <FI label="Valor ($)" type="number" value={form.valor} onChange={e=>setForm({...form,valor:e.target.value})}/>
+          <div className="col-span-2"><FI label="Fecha seguimiento" type="date" value={form.fechaSeguimiento} onChange={e=>setForm({...form,fechaSeguimiento:e.target.value})}/></div>
+          <div className="col-span-2"><FT label="Notas" value={form.notas} onChange={e=>setForm({...form,notas:e.target.value})}/></div>
         </div>
-      )}
-      {modal&&(
-        <Modal title={modal==='add'?'Nuevo lead':'Editar lead'} onClose={()=>setModal(null)}>
-          <div className="grid grid-cols-2 gap-x-4">
-            <FI label="Nombre del contacto *" value={form.clienteNombre} onChange={e=>setForm({...form,clienteNombre:e.target.value})}/>
-            <FI label="Teléfono" value={form.telefono} onChange={e=>setForm({...form,telefono:e.target.value})}/>
-            <FS label="Origen" opts={ORIGENES} value={form.origen} onChange={e=>setForm({...form,origen:e.target.value})}/>
-            <FS label="Producto" opts={PRODUCTOS} value={form.producto} onChange={e=>setForm({...form,producto:e.target.value})}/>
-            <FS label="Etapa" opts={ETAPAS} value={form.etapa} onChange={e=>setForm({...form,etapa:e.target.value})}/>
-            <FI label="Valor estimado ($)" type="number" value={form.valor} onChange={e=>setForm({...form,valor:e.target.value})}/>
-            <div className="col-span-2"><FI label="Fecha de seguimiento" type="date" value={form.fechaSeguimiento} onChange={e=>setForm({...form,fechaSeguimiento:e.target.value})}/></div>
-            <div className="col-span-2"><FT label="Notas" value={form.notas} onChange={e=>setForm({...form,notas:e.target.value})}/></div>
-          </div>
-          <div className="flex gap-3 justify-between">
-            {modal!=='add'&&<Btn variant="danger" onClick={()=>{del(modal.id);setModal(null);}}>Eliminar</Btn>}
-            <div className="flex gap-3 ml-auto"><Btn variant="secondary" onClick={()=>setModal(null)}>Cancelar</Btn><Btn onClick={save}>Guardar</Btn></div>
-          </div>
-        </Modal>
-      )}
+        <div className="flex gap-3 justify-between">
+          {modal!=='add'&&<Btn variant="danger" onClick={()=>{del(modal.id);setModal(null);}}>Eliminar</Btn>}
+          <div className="flex gap-3 ml-auto"><Btn variant="secondary" onClick={()=>setModal(null)}>Cancelar</Btn><Btn onClick={save}>Guardar</Btn></div>
+        </div>
+      </Modal>}
     </div>
   );
 }
-
-/* ═══════════════════════════════
-   PRESUPUESTOS
-═══════════════════════════════ */
+ 
+/* ─── PRESUPUESTOS ─── */
 function Presupuestos({presupuestos,setPresupuestos}){
   const [modal,setModal]=useState(null);
   const [filtro,setFiltro]=useState('todos');
@@ -598,7 +652,7 @@ function Presupuestos({presupuestos,setPresupuestos}){
   function dup(p){setPresupuestos(prev=>[{...p,id:nid(),numero:nnum([...prev,{}]),fecha:hoy(),vencimiento:enDias(14),estado:'Borrador',items:p.items.map(i=>({...i,id:nid()}))}, ...prev]);}
   function addItem(){setForm(f=>({...f,items:[...f.items,{id:nid(),desc:'',cant:1,precio:0}]}));}
   function remItem(id){setForm(f=>({...f,items:f.items.filter(i=>i.id!==id)}));}
-  function updItem(id,k,v){setForm(f=>({...f,items:f.items.map(i=>i.id===id?{...i,[k]:k==='desc'?v:num(v)}:i)}));}
+  function updItem(id,k,v){setForm(f=>({...f,items:f.items.map(i=>i.id===id?{...i,[k]:k==='desc'?v:n(v)}:i)}));}
   return(
     <div className="fade-in">
       <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
@@ -606,72 +660,62 @@ function Presupuestos({presupuestos,setPresupuestos}){
         <Btn onClick={()=>{setForm(ef(presupuestos));setModal('add');}}>+ Nuevo presupuesto</Btn>
       </div>
       <div className="flex gap-2 mb-5 flex-wrap">
-        {['todos',...EST_PPTO].map(e=>{const cnt=e==='todos'?presupuestos.length:presupuestos.filter(p=>p.estado===e).length;return cnt>0?(
-          <button key={e} onClick={()=>setFiltro(e)} className={`px-4 py-1.5 rounded-full text-sm font-medium border transition ${filtro===e?'bg-teal-600 text-white border-teal-600':'bg-white border-slate-200 text-slate-600 hover:border-teal-300'}`}>{e==='todos'?'Todos':e} ({cnt})</button>
-        ):null;})}
+        {['todos',...EST_PPTO].map(e=>{const cnt=e==='todos'?presupuestos.length:presupuestos.filter(p=>p.estado===e).length;return cnt>0?<button key={e} onClick={()=>setFiltro(e)} className={`px-4 py-1.5 rounded-full text-sm font-medium border transition ${filtro===e?'bg-teal-600 text-white border-teal-600':'bg-white border-slate-200 text-slate-600'}`}>{e==='todos'?'Todos':e} ({cnt})</button>:null;})}
       </div>
-      <div className="space-y-3">
-        {filtered.map(p=>(
-          <div key={p.id} className="bg-white border border-slate-100 rounded-xl p-4 card-hover cursor-pointer" onClick={()=>{setForm({...p,items:p.items.map(i=>({...i}))});setModal(p);}}>
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap mb-1"><span className="text-xs font-mono text-slate-400">{p.numero}</span><Badge text={p.estado} cls={C.ppto[p.estado]}/></div>
-                <p className="font-semibold text-slate-800">{p.clienteNombre}</p>
-                <p className="text-xs text-slate-400 mt-1">📅 {p.fecha} → Vence: {p.vencimiento} · {p.condPago}</p>
-              </div>
-              <div className="text-right flex-shrink-0">
-                <p className="text-xl font-bold text-teal-700">{pesos(totalP(p))}</p>
-                <div className="flex gap-2 mt-1 justify-end">
-                  <button onClick={e=>{e.stopPropagation();dup(p);}} className="text-xs text-slate-400 hover:text-slate-700">Duplicar</button>
-                  <button onClick={e=>{e.stopPropagation();del(p.id);}} className="text-xs text-red-400 hover:text-red-600">Borrar</button>
-                </div>
+      <div className="space-y-3">{filtered.map(p=>(
+        <div key={p.id} className="bg-white border border-slate-100 rounded-xl p-4 card-hover cursor-pointer" onClick={()=>{setForm({...p,items:p.items.map(i=>({...i}))});setModal(p);}}>
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap mb-1"><span className="text-xs font-mono text-slate-400">{p.numero}</span><Badge text={p.estado} cls={C.ppto[p.estado]}/></div>
+              <p className="font-semibold text-slate-800">{p.clienteNombre}</p>
+              <p className="text-xs text-slate-400 mt-1">📅 {p.fecha} → Vence: {p.vencimiento} · {p.condPago}</p>
+            </div>
+            <div className="text-right flex-shrink-0">
+              <p className="text-xl font-bold text-teal-700">{pesos(totalP(p))}</p>
+              <div className="flex gap-2 mt-1 justify-end">
+                <button onClick={e=>{e.stopPropagation();dup(p);}} className="text-xs text-slate-400 hover:text-slate-700">Duplicar</button>
+                <button onClick={e=>{e.stopPropagation();del(p.id);}} className="text-xs text-red-400 hover:text-red-600">Borrar</button>
               </div>
             </div>
           </div>
-        ))}
-        {filtered.length===0&&<div className="text-center py-16 text-slate-400">No hay presupuestos.</div>}
+        </div>
+      ))}
+      {filtered.length===0&&<div className="text-center py-16 text-slate-400">No hay presupuestos.</div>}
       </div>
-      {modal&&(
-        <Modal title={modal==='add'?'Nuevo presupuesto':`Presupuesto ${form.numero}`} onClose={()=>setModal(null)} size="lg">
-          <div className="grid grid-cols-2 gap-x-4">
-            <FI label="Número" value={form.numero} onChange={e=>setForm({...form,numero:e.target.value})}/>
-            <FS label="Estado" opts={EST_PPTO} value={form.estado} onChange={e=>setForm({...form,estado:e.target.value})}/>
-            <div className="col-span-2"><FI label="Cliente *" value={form.clienteNombre} onChange={e=>setForm({...form,clienteNombre:e.target.value})}/></div>
-            <FI label="Fecha emisión" type="date" value={form.fecha} onChange={e=>setForm({...form,fecha:e.target.value})}/>
-            <FI label="Vencimiento" type="date" value={form.vencimiento} onChange={e=>setForm({...form,vencimiento:e.target.value})}/>
-            <div className="col-span-2"><FI label="Condición de pago" value={form.condPago} onChange={e=>setForm({...form,condPago:e.target.value})}/></div>
-          </div>
-          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Ítems del presupuesto</label>
-          <div className="space-y-2 mb-2">
-            <div className="grid grid-cols-12 gap-1 text-xs text-slate-400 px-1"><span className="col-span-6">Descripción</span><span className="col-span-2 text-center">Cant.</span><span className="col-span-2 text-right">Precio</span><span className="col-span-1 text-right">Subtotal</span><span className="col-span-1"/></div>
-            {form.items.map(item=>(
-              <div key={item.id} className="grid grid-cols-12 gap-1 items-center">
-                <input className="col-span-6 border border-slate-200 rounded-lg px-2 py-1.5 text-sm focus:border-teal-400 focus:outline-none bg-white" placeholder="Descripción" value={item.desc} onChange={e=>updItem(item.id,'desc',e.target.value)}/>
-                <input className="col-span-2 border border-slate-200 rounded-lg px-2 py-1.5 text-sm text-center focus:border-teal-400 focus:outline-none bg-white" type="number" min="0" value={item.cant} onChange={e=>updItem(item.id,'cant',e.target.value)}/>
-                <input className="col-span-2 border border-slate-200 rounded-lg px-2 py-1.5 text-sm text-right focus:border-teal-400 focus:outline-none bg-white" type="number" min="0" value={item.precio} onChange={e=>updItem(item.id,'precio',e.target.value)}/>
-                <span className="col-span-1 text-sm font-medium text-teal-700 text-right">{pesos(item.cant*item.precio)}</span>
-                <button onClick={()=>remItem(item.id)} className="col-span-1 text-red-400 hover:text-red-600 text-lg text-center">×</button>
-              </div>
-            ))}
-          </div>
-          <button onClick={addItem} className="text-sm text-teal-600 hover:text-teal-800 font-medium">+ Agregar ítem</button>
-          <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center">
-            <span className="font-semibold text-slate-700">TOTAL</span>
-            <span className="text-2xl font-bold text-teal-700">{pesos(form.items.reduce((s,i)=>s+i.cant*i.precio,0))}</span>
-          </div>
-          <div className="flex gap-3 justify-between mt-4">
-            {modal!=='add'&&<Btn variant="danger" onClick={()=>{del(modal.id);setModal(null);}}>Eliminar</Btn>}
-            <div className="flex gap-3 ml-auto"><Btn variant="secondary" onClick={()=>setModal(null)}>Cancelar</Btn><Btn onClick={save}>Guardar</Btn></div>
-          </div>
-        </Modal>
-      )}
+      {modal&&<Modal title={modal==='add'?'Nuevo presupuesto':`Presupuesto ${form.numero}`} onClose={()=>setModal(null)} size="lg">
+        <div className="grid grid-cols-2 gap-x-4">
+          <FI label="Número" value={form.numero} onChange={e=>setForm({...form,numero:e.target.value})}/>
+          <FS label="Estado" opts={EST_PPTO} value={form.estado} onChange={e=>setForm({...form,estado:e.target.value})}/>
+          <div className="col-span-2"><FI label="Cliente *" value={form.clienteNombre} onChange={e=>setForm({...form,clienteNombre:e.target.value})}/></div>
+          <FI label="Fecha emisión" type="date" value={form.fecha} onChange={e=>setForm({...form,fecha:e.target.value})}/>
+          <FI label="Vencimiento" type="date" value={form.vencimiento} onChange={e=>setForm({...form,vencimiento:e.target.value})}/>
+          <div className="col-span-2"><FI label="Condición de pago" value={form.condPago} onChange={e=>setForm({...form,condPago:e.target.value})}/></div>
+        </div>
+        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Ítems</label>
+        <div className="space-y-2 mb-2">
+          <div className="grid grid-cols-12 gap-1 text-xs text-slate-400 px-1"><span className="col-span-6">Descripción</span><span className="col-span-2 text-center">Cant.</span><span className="col-span-2 text-right">Precio</span><span className="col-span-1 text-right">Sub.</span><span className="col-span-1"/></div>
+          {form.items.map(item=>(
+            <div key={item.id} className="grid grid-cols-12 gap-1 items-center">
+              <input className="col-span-6 border border-slate-200 rounded-lg px-2 py-1.5 text-sm focus:border-teal-400 focus:outline-none bg-white" value={item.desc} onChange={e=>updItem(item.id,'desc',e.target.value)} placeholder="Descripción"/>
+              <input className="col-span-2 border border-slate-200 rounded-lg px-2 py-1.5 text-sm text-center focus:border-teal-400 focus:outline-none bg-white" type="number" min="0" value={item.cant} onChange={e=>updItem(item.id,'cant',e.target.value)}/>
+              <input className="col-span-2 border border-slate-200 rounded-lg px-2 py-1.5 text-sm text-right focus:border-teal-400 focus:outline-none bg-white" type="number" min="0" value={item.precio} onChange={e=>updItem(item.id,'precio',e.target.value)}/>
+              <span className="col-span-1 text-xs font-medium text-teal-700 text-right">{pesos(item.cant*item.precio)}</span>
+              <button onClick={()=>remItem(item.id)} className="col-span-1 text-red-400 hover:text-red-600 text-lg text-center">×</button>
+            </div>
+          ))}
+        </div>
+        <button onClick={addItem} className="text-sm text-teal-600 hover:text-teal-800 font-medium">+ Agregar ítem</button>
+        <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center"><span className="font-semibold text-slate-700">TOTAL</span><span className="text-2xl font-bold text-teal-700">{pesos(form.items.reduce((s,i)=>s+i.cant*i.precio,0))}</span></div>
+        <div className="flex gap-3 justify-between mt-4">
+          {modal!=='add'&&<Btn variant="danger" onClick={()=>{del(modal.id);setModal(null);}}>Eliminar</Btn>}
+          <div className="flex gap-3 ml-auto"><Btn variant="secondary" onClick={()=>setModal(null)}>Cancelar</Btn><Btn onClick={save}>Guardar</Btn></div>
+        </div>
+      </Modal>}
     </div>
   );
 }
-
-/* ═══════════════════════════════
-   OBRAS
-═══════════════════════════════ */
+ 
+/* ─── OBRAS ─── */
 function Obras({obras,setObras}){
   const [modal,setModal]=useState(null);
   const empty={clienteNombre:'',producto:'',estado:'Pendiente de materiales',fechaInstalacion:'',instalador:'',presupuesto:'',observaciones:'',checklist:{medicion:false,material:false,instalacion:false,cobro:false}};
@@ -680,7 +724,7 @@ function Obras({obras,setObras}){
   const filtered=filtro==='activas'?obras.filter(o=>o.estado!=='Cobrada'):filtro==='cobradas'?obras.filter(o=>o.estado==='Cobrada'):obras;
   function save(){if(!form.clienteNombre.trim())return;if(modal==='add')setObras(p=>[...p,{...form,id:nid()}]);else setObras(p=>p.map(o=>o.id===modal.id?{...o,...form}:o));setModal(null);}
   function del(id){if(confirm('¿Eliminar obra?'))setObras(p=>p.filter(o=>o.id!==id));}
-  function toggleCheck(id,campo){setObras(p=>p.map(o=>o.id===id?{...o,checklist:{...o.checklist,[campo]:!o.checklist[campo]}}:o));}
+  function tck(id,campo){setObras(p=>p.map(o=>o.id===id?{...o,checklist:{...o.checklist,[campo]:!o.checklist[campo]}}:o));}
   const CL={medicion:'Medición',material:'Material',instalacion:'Instalación',cobro:'Cobro'};
   return(
     <div className="fade-in">
@@ -690,68 +734,60 @@ function Obras({obras,setObras}){
       </div>
       <div className="flex gap-2 mb-5">
         {[{k:'activas',l:'Activas'},{k:'cobradas',l:'Cobradas'},{k:'todas',l:'Todas'}].map(f=>(
-          <button key={f.k} onClick={()=>setFiltro(f.k)} className={`px-4 py-1.5 rounded-full text-sm font-medium border transition ${filtro===f.k?'bg-teal-600 text-white border-teal-600':'bg-white border-slate-200 text-slate-600 hover:border-teal-300'}`}>{f.l}</button>
+          <button key={f.k} onClick={()=>setFiltro(f.k)} className={`px-4 py-1.5 rounded-full text-sm font-medium border transition ${filtro===f.k?'bg-teal-600 text-white border-teal-600':'bg-white border-slate-200 text-slate-600'}`}>{f.l}</button>
         ))}
       </div>
-      <div className="space-y-4">
-        {filtered.map(o=>{
-          const done=Object.values(o.checklist).filter(Boolean).length;
-          const pct=Math.round((done/4)*100);
-          return(
-            <div key={o.id} className={`bg-white border rounded-xl p-4 card-hover ${o.estado==='Cobrada'?'border-green-100':'border-slate-100'}`}>
-              <div className="flex items-start justify-between gap-3 mb-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap mb-1"><p className="font-semibold text-slate-800">{o.clienteNombre}</p><Badge text={o.estado} cls={C.obra[o.estado]}/></div>
-                  <p className="text-sm text-slate-600">{o.producto}</p>
-                  <div className="text-xs text-slate-400 mt-1 flex gap-4 flex-wrap">{o.fechaInstalacion&&<span>📅 {o.fechaInstalacion}</span>}{o.instalador&&<span>👷 {o.instalador}</span>}{o.presupuesto&&<span>📋 {o.presupuesto}</span>}</div>
-                  {o.observaciones&&<p className="text-xs text-slate-400 italic mt-1">"{o.observaciones}"</p>}
-                </div>
-                <div className="flex gap-3 flex-shrink-0">
-                  <button onClick={()=>{setForm({...o,checklist:{...o.checklist}});setModal(o);}} className="text-xs text-teal-600 hover:text-teal-800 font-medium">Editar</button>
-                  <button onClick={()=>del(o.id)} className="text-xs text-red-400 hover:text-red-600 font-medium">Borrar</button>
-                </div>
-              </div>
-              <div className="flex gap-2 flex-wrap mb-3">
-                {Object.entries(CL).map(([campo,label])=>(
-                  <button key={campo} onClick={()=>toggleCheck(o.id,campo)} className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition ${o.checklist[campo]?'bg-teal-50 border-teal-300 text-teal-700 font-medium':'bg-white border-slate-200 text-slate-500 hover:border-teal-200'}`}>
-                    <span className={`w-4 h-4 rounded-full flex items-center justify-center text-xs ${o.checklist[campo]?'bg-teal-500 text-white':'bg-slate-200'}`}>{o.checklist[campo]?'✓':''}</span>
-                    {label}
-                  </button>
-                ))}
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="flex-1 bg-slate-100 rounded-full h-2"><div className={`h-2 rounded-full transition-all ${pct===100?'bg-green-500':'bg-teal-500'}`} style={{width:`${pct}%`}}></div></div>
-                <span className={`text-xs font-medium ${pct===100?'text-green-600':'text-slate-500'}`}>{pct}%</span>
-              </div>
+      <div className="space-y-4">{filtered.map(o=>{
+        const done=Object.values(o.checklist).filter(Boolean).length;
+        const pct=Math.round((done/4)*100);
+        return <div key={o.id} className={`bg-white border rounded-xl p-4 card-hover ${o.estado==='Cobrada'?'border-green-100':'border-slate-100'}`}>
+          <div className="flex items-start justify-between gap-3 mb-3">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap mb-1"><p className="font-semibold text-slate-800">{o.clienteNombre}</p><Badge text={o.estado} cls={C.obra[o.estado]}/></div>
+              <p className="text-sm text-slate-600">{o.producto}</p>
+              <div className="text-xs text-slate-400 mt-1 flex gap-4 flex-wrap">{o.fechaInstalacion&&<span>📅 {o.fechaInstalacion}</span>}{o.instalador&&<span>👷 {o.instalador}</span>}{o.presupuesto&&<span>📋 {o.presupuesto}</span>}</div>
+              {o.observaciones&&<p className="text-xs text-slate-400 italic mt-1">"{o.observaciones}"</p>}
             </div>
-          );
-        })}
-        {filtered.length===0&&<div className="text-center py-16 text-slate-400">No hay obras en este filtro.</div>}
+            <div className="flex gap-3 flex-shrink-0">
+              <button onClick={()=>{setForm({...o,checklist:{...o.checklist}});setModal(o);}} className="text-xs text-teal-600 hover:text-teal-800 font-medium">Editar</button>
+              <button onClick={()=>del(o.id)} className="text-xs text-red-400 hover:text-red-600 font-medium">Borrar</button>
+            </div>
+          </div>
+          <div className="flex gap-2 flex-wrap mb-3">
+            {Object.entries(CL).map(([campo,label])=>(
+              <button key={campo} onClick={()=>tck(o.id,campo)} className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition ${o.checklist[campo]?'bg-teal-50 border-teal-300 text-teal-700 font-medium':'bg-white border-slate-200 text-slate-500'}`}>
+                <span className={`w-4 h-4 rounded-full flex items-center justify-center text-xs ${o.checklist[campo]?'bg-teal-500 text-white':'bg-slate-200'}`}>{o.checklist[campo]?'✓':''}</span>{label}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex-1 bg-slate-100 rounded-full h-2"><div className={`h-2 rounded-full transition-all ${pct===100?'bg-green-500':'bg-teal-500'}`} style={{width:`${pct}%`}}/></div>
+            <span className={`text-xs font-medium ${pct===100?'text-green-600':'text-slate-500'}`}>{pct}%</span>
+          </div>
+        </div>;
+      })}
+      {filtered.length===0&&<div className="text-center py-16 text-slate-400">No hay obras en este filtro.</div>}
       </div>
-      {modal&&(
-        <Modal title={modal==='add'?'Nueva obra':'Editar obra'} onClose={()=>setModal(null)}>
-          <div className="grid grid-cols-2 gap-x-4">
-            <div className="col-span-2"><FI label="Cliente *" value={form.clienteNombre} onChange={e=>setForm({...form,clienteNombre:e.target.value})}/></div>
-            <div className="col-span-2"><FI label="Producto / Descripción" value={form.producto} onChange={e=>setForm({...form,producto:e.target.value})}/></div>
-            <FS label="Estado" opts={EST_OBRA} value={form.estado} onChange={e=>setForm({...form,estado:e.target.value})}/>
-            <FI label="Instalador" value={form.instalador} onChange={e=>setForm({...form,instalador:e.target.value})}/>
-            <FI label="Fecha instalación" type="date" value={form.fechaInstalacion} onChange={e=>setForm({...form,fechaInstalacion:e.target.value})}/>
-            <FI label="N° Presupuesto" value={form.presupuesto} onChange={e=>setForm({...form,presupuesto:e.target.value})}/>
-            <div className="col-span-2"><FT label="Observaciones técnicas" value={form.observaciones} onChange={e=>setForm({...form,observaciones:e.target.value})}/></div>
-          </div>
-          <div className="flex gap-3 justify-between">
-            {modal!=='add'&&<Btn variant="danger" onClick={()=>{del(modal.id);setModal(null);}}>Eliminar</Btn>}
-            <div className="flex gap-3 ml-auto"><Btn variant="secondary" onClick={()=>setModal(null)}>Cancelar</Btn><Btn onClick={save}>Guardar</Btn></div>
-          </div>
-        </Modal>
-      )}
+      {modal&&<Modal title={modal==='add'?'Nueva obra':'Editar obra'} onClose={()=>setModal(null)}>
+        <div className="grid grid-cols-2 gap-x-4">
+          <div className="col-span-2"><FI label="Cliente *" value={form.clienteNombre} onChange={e=>setForm({...form,clienteNombre:e.target.value})}/></div>
+          <div className="col-span-2"><FI label="Producto / Descripción" value={form.producto} onChange={e=>setForm({...form,producto:e.target.value})}/></div>
+          <FS label="Estado" opts={EST_OBRA} value={form.estado} onChange={e=>setForm({...form,estado:e.target.value})}/>
+          <FI label="Instalador" value={form.instalador} onChange={e=>setForm({...form,instalador:e.target.value})}/>
+          <FI label="Fecha instalación" type="date" value={form.fechaInstalacion} onChange={e=>setForm({...form,fechaInstalacion:e.target.value})}/>
+          <FI label="N° Presupuesto" value={form.presupuesto} onChange={e=>setForm({...form,presupuesto:e.target.value})}/>
+          <div className="col-span-2"><FT label="Observaciones técnicas" value={form.observaciones} onChange={e=>setForm({...form,observaciones:e.target.value})}/></div>
+        </div>
+        <div className="flex gap-3 justify-between">
+          {modal!=='add'&&<Btn variant="danger" onClick={()=>{del(modal.id);setModal(null);}}>Eliminar</Btn>}
+          <div className="flex gap-3 ml-auto"><Btn variant="secondary" onClick={()=>setModal(null)}>Cancelar</Btn><Btn onClick={save}>Guardar</Btn></div>
+        </div>
+      </Modal>}
     </div>
   );
 }
-
-/* ═══════════════════════════════
-   TAREAS
-═══════════════════════════════ */
+ 
+/* ─── TAREAS ─── */
 function Tareas({tareas,setTareas}){
   const [modal,setModal]=useState(false);
   const empty={titulo:'',prioridad:'Media',tipo:'Seguimiento',estado:'Pendiente',vencimiento:'',notas:''};
@@ -771,171 +807,199 @@ function Tareas({tareas,setTareas}){
       </div>
       <div className="flex gap-2 mb-5 flex-wrap">
         {[{k:'Pendiente',l:`Pendientes (${pend})`},{k:'Completada',l:`Completadas (${tareas.filter(t=>t.estado==='Completada').length})`},{k:'todas',l:'Todas'}].map(f=>(
-          <button key={f.k} onClick={()=>setFiltro(f.k)} className={`px-4 py-1.5 rounded-full text-sm font-medium border transition ${filtro===f.k?'bg-teal-600 text-white border-teal-600':'bg-white border-slate-200 text-slate-600 hover:border-teal-300'}`}>{f.l}</button>
+          <button key={f.k} onClick={()=>setFiltro(f.k)} className={`px-4 py-1.5 rounded-full text-sm font-medium border transition ${filtro===f.k?'bg-teal-600 text-white border-teal-600':'bg-white border-slate-200 text-slate-600'}`}>{f.l}</button>
         ))}
       </div>
-      <div className="space-y-2">
-        {sorted.map(t=>(
-          <div key={t.id} className={`bg-white border rounded-xl p-3 flex items-center gap-3 card-hover ${t.estado==='Completada'?'opacity-50 border-slate-100':'border-slate-100'}`}>
-            <button onClick={()=>toggle(t.id)} className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition ${t.estado==='Completada'?'bg-teal-500 border-teal-500 text-white':'border-slate-300 hover:border-teal-400'}`}>
-              {t.estado==='Completada'&&<span className="text-xs font-bold">✓</span>}
-            </button>
-            <div className="flex-1 min-w-0">
-              <p className={`text-sm font-medium ${t.estado==='Completada'?'line-through text-slate-400':'text-slate-700'}`}>{t.titulo}</p>
-              <div className="flex items-center gap-2 mt-1 flex-wrap">
-                <Badge text={t.prioridad} cls={C.prio[t.prioridad]}/>
-                <Badge text={t.tipo} cls={C.ttarea[t.tipo]||'bg-slate-100 text-slate-500'}/>
-                {t.vencimiento&&<span className="text-xs text-slate-400">📅 {t.vencimiento}</span>}
-              </div>
-            </div>
-            <button onClick={()=>del(t.id)} className="text-slate-300 hover:text-red-400 text-xl transition flex-shrink-0">×</button>
+      <div className="space-y-2">{sorted.map(t=>(
+        <div key={t.id} className={`bg-white border rounded-xl p-3 flex items-center gap-3 card-hover ${t.estado==='Completada'?'opacity-50 border-slate-100':'border-slate-100'}`}>
+          <button onClick={()=>toggle(t.id)} className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition ${t.estado==='Completada'?'bg-teal-500 border-teal-500 text-white':'border-slate-300 hover:border-teal-400'}`}>{t.estado==='Completada'&&<span className="text-xs font-bold">✓</span>}</button>
+          <div className="flex-1 min-w-0">
+            <p className={`text-sm font-medium ${t.estado==='Completada'?'line-through text-slate-400':'text-slate-700'}`}>{t.titulo}</p>
+            <div className="flex items-center gap-2 mt-1 flex-wrap"><Badge text={t.prioridad} cls={C.prio[t.prioridad]}/><Badge text={t.tipo} cls={C.ttarea[t.tipo]||'bg-slate-100 text-slate-500'}/>{t.vencimiento&&<span className="text-xs text-slate-400">📅 {t.vencimiento}</span>}</div>
           </div>
-        ))}
-        {sorted.length===0&&<div className="text-center py-16 text-slate-400">{filtro==='Completada'?'No hay tareas completadas.':'¡Todo al día! 🎉'}</div>}
+          <button onClick={()=>del(t.id)} className="text-slate-300 hover:text-red-400 text-xl transition flex-shrink-0">×</button>
+        </div>
+      ))}
+      {sorted.length===0&&<div className="text-center py-16 text-slate-400">{filtro==='Completada'?'No hay tareas completadas.':'¡Todo al día! 🎉'}</div>}
       </div>
-      {modal&&(
-        <Modal title="Nueva tarea" onClose={()=>setModal(false)}>
-          <div className="grid grid-cols-2 gap-x-4">
-            <div className="col-span-2"><FI label="Título *" value={form.titulo} onChange={e=>setForm({...form,titulo:e.target.value})} placeholder="Ej: Llamar cliente para confirmar medición"/></div>
-            <FS label="Prioridad" opts={['Alta','Media','Baja']} value={form.prioridad} onChange={e=>setForm({...form,prioridad:e.target.value})}/>
-            <FS label="Tipo" opts={TIPOS_TAREA} value={form.tipo} onChange={e=>setForm({...form,tipo:e.target.value})}/>
-            <div className="col-span-2"><FI label="Fecha límite" type="date" value={form.vencimiento} onChange={e=>setForm({...form,vencimiento:e.target.value})}/></div>
-            <div className="col-span-2"><FT label="Notas" value={form.notas} onChange={e=>setForm({...form,notas:e.target.value})}/></div>
-          </div>
-          <div className="flex gap-3 justify-end"><Btn variant="secondary" onClick={()=>setModal(false)}>Cancelar</Btn><Btn onClick={save}>Agregar</Btn></div>
-        </Modal>
-      )}
+      {modal&&<Modal title="Nueva tarea" onClose={()=>setModal(false)}>
+        <div className="grid grid-cols-2 gap-x-4">
+          <div className="col-span-2"><FI label="Título *" value={form.titulo} onChange={e=>setForm({...form,titulo:e.target.value})} placeholder="Ej: Llamar cliente para confirmar medición"/></div>
+          <FS label="Prioridad" opts={['Alta','Media','Baja']} value={form.prioridad} onChange={e=>setForm({...form,prioridad:e.target.value})}/>
+          <FS label="Tipo" opts={TIPOS_TAREA} value={form.tipo} onChange={e=>setForm({...form,tipo:e.target.value})}/>
+          <div className="col-span-2"><FI label="Fecha límite" type="date" value={form.vencimiento} onChange={e=>setForm({...form,vencimiento:e.target.value})}/></div>
+          <div className="col-span-2"><FT label="Notas" value={form.notas} onChange={e=>setForm({...form,notas:e.target.value})}/></div>
+        </div>
+        <div className="flex gap-3 justify-end"><Btn variant="secondary" onClick={()=>setModal(false)}>Cancelar</Btn><Btn onClick={save}>Agregar</Btn></div>
+      </Modal>}
     </div>
   );
 }
-
-/* ═══════════════════════════════
-   APP PRINCIPAL
-═══════════════════════════════ */
-const NAV=[{id:'dashboard',label:'Dashboard',icon:'📊'},{id:'clientes',label:'Clientes',icon:'👥'},{id:'leads',label:'Leads',icon:'🔥'},{id:'presupuestos',label:'Presupuestos',icon:'📋'},{id:'obras',label:'Obras',icon:'🏗️'},{id:'tareas',label:'Tareas',icon:'✅'}];
-
+ 
+/* ═══════════════════════════════════════════
+   APP PRINCIPAL — con gestión de concurrencia y soporte mobile
+═══════════════════════════════════════════ */
+const NAV=[{id:'dashboard',label:'Inicio',icon:'📊'},{id:'clientes',label:'Clientes',icon:'👥'},{id:'leads',label:'Leads',icon:'🔥'},{id:'presupuestos',label:'Ppto.',icon:'📋'},{id:'obras',label:'Obras',icon:'🏗️'},{id:'tareas',label:'Tareas',icon:'✅'}];
+ 
 function App(){
-  const [scriptUrl,setScriptUrl]=useLs('gv_cloud_url','');
+  const isMobile=useIsMobile();
+  const [scriptUrl,setScriptUrl]=useLs('gv_cloud_url_v2','');
   const [appState,setAppState]=useState(scriptUrl?'loading':'setup');
-  const [loadMsg,setLoadMsg]=useState('Cargando datos desde Google Sheets...');
+  const [loadMsg,setLoadMsg]=useState('Cargando desde Google Sheets...');
   const [sec,setSec]=useState('dashboard');
   const [sideOpen,setSideOpen]=useState(true);
-
+ 
   const [clientes,setClientes]=useState([]);
   const [leads,setLeads]=useState([]);
   const [presupuestos,setPresupuestos]=useState([]);
   const [obras,setObras]=useState([]);
   const [tareas,setTareas]=useState([]);
-
+ 
   const [syncStatus,setSyncStatus]=useState('idle');
   const [lastSync,setLastSync]=useState('');
+  const [hasConflict,setHasConflict]=useState(false);
+  const [pendingCount,setPendingCount]=useState(0);
   const [toast,setToast]=useState(null);
-
+ 
   const saveTimer=useRef(null);
+  const refreshTimer=useRef(null);
+  const lastSavedTs=useRef('');
   const dataReady=useRef(false);
-
+  const isSaving=useRef(false);
+ 
   const tareasAltas=tareas.filter(t=>t.estado==='Pendiente'&&t.prioridad==='Alta').length;
-
-  // ── Cargar datos al inicio ──
-  useEffect(()=>{
-    if(scriptUrl&&appState==='loading'){
-      loadData(scriptUrl);
-    }
-  },[]);
-
-  async function loadData(url){
-    setLoadMsg('Conectando con Google Sheets...');
+ 
+  useEffect(()=>{if(scriptUrl&&appState==='loading') loadData(scriptUrl,true);},[]);
+ 
+  async function loadData(url,initial=false){
+    if(initial) setLoadMsg('Cargando desde Google Sheets...');
     try{
       const d=await sheetsLoad(url);
       const empty=!d.clientes.length&&!d.leads.length&&!d.tareas.length;
-      if(empty){
-        setLoadMsg('Primera vez — cargando datos de ejemplo...');
+      if(empty&&initial){
+        setLoadMsg('Primera vez — inicializando datos de ejemplo...');
         setClientes(INIT.clientes);setLeads(INIT.leads);setPresupuestos(INIT.presupuestos);setObras(INIT.obras);setTareas(INIT.tareas);
-        await sheetsSave(url,INIT.clientes,INIT.leads,INIT.presupuestos,INIT.obras,INIT.tareas);
+        const ts=await sheetsSave(url,INIT.clientes,INIT.leads,INIT.presupuestos,INIT.obras,INIT.tareas);
+        lastSavedTs.current=ts;
       } else {
         setClientes(d.clientes);setLeads(d.leads);setPresupuestos(d.presupuestos);setObras(d.obras);setTareas(d.tareas);
+        if(d.lastModified) lastSavedTs.current=d.lastModified;
       }
-      setLastSync(new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}));
-      setSyncStatus('idle');
-      setAppState('loaded');
-      setTimeout(()=>{dataReady.current=true;},500);
+      setLastSync(hora());setSyncStatus('idle');setHasConflict(false);
+      if(initial){setAppState('loaded');setTimeout(()=>{dataReady.current=true;startAutoRefresh(url);},600);}
     }catch(e){
-      showToast('❌ Error al cargar: '+e.message,'error');
-      setAppState(scriptUrl?'loaded':'setup');
+      if(initial){showToast('❌ Error al cargar: '+e.message,'error');setAppState('setup');}
+      else setSyncStatus('error');
     }
   }
-
-  async function handleConnect(url){
-    setScriptUrl(url);
-    setAppState('loading');
-    await loadData(url);
-  }
-
-  function disconnect(){
-    if(confirm('¿Desconectar de Google Sheets? Vas a necesitar volver a ingresar la URL la próxima vez.')){
-      setScriptUrl('');
-      localStorage.removeItem('gv_cloud_url');
-      setAppState('setup');
-    }
-  }
-
-  // ── Auto-guardar con debounce ──
-  async function autoSave(c,l,p,o,t){
-    if(!dataReady.current||!scriptUrl)return;
-    setSyncStatus('pending');
-    if(saveTimer.current)clearTimeout(saveTimer.current);
-    saveTimer.current=setTimeout(async()=>{
-      setSyncStatus('saving');
+ 
+  function startAutoRefresh(url){
+    if(refreshTimer.current) clearInterval(refreshTimer.current);
+    refreshTimer.current=setInterval(async()=>{
+      if(isSaving.current) return;
+      setSyncStatus(s=>s==='pending'?s:'checking');
       try{
-        await sheetsSave(scriptUrl,c,l,p,o,t);
-        setSyncStatus('idle');
-        setLastSync(new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}));
-      }catch(e){
-        setSyncStatus('error');
-        showToast('❌ Error al guardar: '+e.message,'error');
-      }
-    },3000);
+        const d=await sheetsLoad(url);
+        if(d.lastModified&&d.lastModified>lastSavedTs.current&&!isSaving.current){
+          setHasConflict(true);setSyncStatus('idle');
+        } else setSyncStatus(s=>s==='checking'?'idle':s);
+      }catch{setSyncStatus(s=>s==='checking'?'idle':s);}
+    },AUTO_REFRESH_MS);
   }
-
-  // ── Wrappers de setters que disparan auto-save ──
-  function setC(v){const nv=typeof v==='function'?v(clientes):v;setClientes(nv);autoSave(nv,leads,presupuestos,obras,tareas);}
-  function setL(v){const nv=typeof v==='function'?v(leads):v;setLeads(nv);autoSave(clientes,nv,presupuestos,obras,tareas);}
-  function setP(v){const nv=typeof v==='function'?v(presupuestos):v;setPresupuestos(nv);autoSave(clientes,leads,nv,obras,tareas);}
-  function setO(v){const nv=typeof v==='function'?v(obras):v;setObras(nv);autoSave(clientes,leads,presupuestos,nv,tareas);}
-  function setT(v){const nv=typeof v==='function'?v(tareas):v;setTareas(nv);autoSave(clientes,leads,presupuestos,obras,nv);}
-
+ 
+  useEffect(()=>()=>{
+    if(refreshTimer.current) clearInterval(refreshTimer.current);
+    if(saveTimer.current) clearTimeout(saveTimer.current);
+  },[]);
+ 
+  async function handleConnect(url){setScriptUrl(url);setAppState('loading');await loadData(url,true);}
+ 
+  function disconnect(){
+    if(confirm('¿Desconectar de Google Sheets?')){
+      if(refreshTimer.current) clearInterval(refreshTimer.current);
+      setScriptUrl('');localStorage.removeItem('gv_cloud_url_v2');
+      setAppState('setup');dataReady.current=false;
+    }
+  }
+ 
+  async function doSave(c,l,p,o,t){
+    if(saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current=setTimeout(async()=>{
+      isSaving.current=true;setSyncStatus('saving');
+      try{
+        const ts=await sheetsSave(scriptUrl,c,l,p,o,t);
+        lastSavedTs.current=ts;setSyncStatus('idle');setLastSync(hora());setPendingCount(0);setHasConflict(false);
+      }catch(e){setSyncStatus('error');showToast('❌ Error al guardar: '+e.message,'error');}
+      finally{isSaving.current=false;}
+    },2500);
+  }
+ 
   async function manualSave(){
-    setSyncStatus('saving');
+    if(saveTimer.current) clearTimeout(saveTimer.current);
+    isSaving.current=true;setSyncStatus('saving');
     try{
-      await sheetsSave(scriptUrl,clientes,leads,presupuestos,obras,tareas);
-      setSyncStatus('idle');
-      setLastSync(new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}));
+      const ts=await sheetsSave(scriptUrl,clientes,leads,presupuestos,obras,tareas);
+      lastSavedTs.current=ts;setSyncStatus('idle');setLastSync(hora());setPendingCount(0);setHasConflict(false);
       showToast('✓ Guardado en Google Sheets');
     }catch(e){setSyncStatus('error');showToast('❌ Error: '+e.message,'error');}
+    finally{isSaving.current=false;}
   }
-
-  function showToast(msg,type='success'){
-    setToast({msg,type});
-    setTimeout(()=>setToast(null),3500);
-  }
-
+ 
+  function setC(v){const nv=typeof v==='function'?v(clientes):v;setClientes(nv);if(!dataReady.current)return;setSyncStatus('pending');setPendingCount(c=>c+1);doSave(nv,leads,presupuestos,obras,tareas);}
+  function setL(v){const nv=typeof v==='function'?v(leads):v;setLeads(nv);if(!dataReady.current)return;setSyncStatus('pending');setPendingCount(c=>c+1);doSave(clientes,nv,presupuestos,obras,tareas);}
+  function setP(v){const nv=typeof v==='function'?v(presupuestos):v;setPresupuestos(nv);if(!dataReady.current)return;setSyncStatus('pending');setPendingCount(c=>c+1);doSave(clientes,leads,nv,obras,tareas);}
+  function setO(v){const nv=typeof v==='function'?v(obras):v;setObras(nv);if(!dataReady.current)return;setSyncStatus('pending');setPendingCount(c=>c+1);doSave(clientes,leads,presupuestos,nv,tareas);}
+  function setT(v){const nv=typeof v==='function'?v(tareas):v;setTareas(nv);if(!dataReady.current)return;setSyncStatus('pending');setPendingCount(c=>c+1);doSave(clientes,leads,presupuestos,obras,nv);}
+ 
+  function handleRefresh(){setHasConflict(false);loadData(scriptUrl,false);}
+  function showToast(msg,type='success'){setToast({msg,type});setTimeout(()=>setToast(null),3500);}
+ 
+  const syncColor={idle:'#0d9488',saving:'#f59e0b',checking:'#94a3b8',pending:'#f59e0b',error:'#ef4444'}[syncStatus]||'#0d9488';
+ 
   if(appState==='setup') return <SetupScreen onConnect={handleConnect}/>;
   if(appState==='loading') return <LoadingScreen msg={loadMsg}/>;
-
+ 
   return(
     <div style={{display:'flex',height:'100vh',overflow:'hidden',flexDirection:'column'}}>
-      <CloudSyncBar syncStatus={syncStatus} lastSync={lastSync} onManualSave={manualSave} onDisconnect={disconnect}/>
-
+ 
+      {/* ── CONFLICT BANNER ── */}
+      {hasConflict&&<ConflictBanner onRefresh={handleRefresh}/>}
+ 
+      {/* ── MOBILE HEADER (visible solo en mobile) ── */}
+      <div className="mobile-header">
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
+          <div style={{width:8,height:8,borderRadius:'50%',background:syncColor,flexShrink:0}}/>
+          <span style={{color:'white',fontFamily:'Syne,sans-serif',fontWeight:800,fontSize:16}}>GRUPO VIEW</span>
+          <span style={{color:'#475569',fontSize:11}}>CRM</span>
+        </div>
+        <div style={{display:'flex',gap:8,alignItems:'center'}}>
+          {syncStatus==='pending'&&<button onClick={manualSave} style={{background:'#0d9488',color:'white',border:'none',borderRadius:8,padding:'6px 12px',fontSize:12,fontWeight:600,cursor:'pointer'}}>Guardar</button>}
+          {syncStatus==='error'&&<button onClick={manualSave} style={{background:'#ef4444',color:'white',border:'none',borderRadius:8,padding:'6px 12px',fontSize:12,fontWeight:600,cursor:'pointer'}}>Reintentar</button>}
+          <button onClick={disconnect} style={{color:'#475569',background:'none',border:'none',fontSize:18,cursor:'pointer',padding:'4px'}}>⚙️</button>
+        </div>
+      </div>
+ 
+      {/* ── DESKTOP SYNC BAR (hidden on mobile via CSS) ── */}
+      <div className="desktop-syncbar">
+        <SyncBar status={syncStatus} lastSync={lastSync} pendingCount={pendingCount} onSave={manualSave} onDisconnect={disconnect}/>
+      </div>
+ 
       <div style={{display:'flex',flex:1,overflow:'hidden'}}>
-        {/* Sidebar */}
-        <aside style={{width:sideOpen?220:64,flexShrink:0,background:'#0f172a',display:'flex',flexDirection:'column',transition:'width .25s ease'}}>
+ 
+        {/* ── DESKTOP SIDEBAR ── */}
+        <aside className="desktop-sidebar" style={{width:sideOpen?220:64,flexShrink:0,background:'#0f172a',display:'flex',flexDirection:'column',transition:'width .25s ease'}}>
           <div style={{padding:'18px 16px 14px',borderBottom:'1px solid rgba(255,255,255,.08)'}}>
             {sideOpen?(
               <div>
                 <div style={{color:'white',fontFamily:'Syne,sans-serif',fontWeight:800,fontSize:17,lineHeight:1.2}}>GRUPO VIEW</div>
-                <div style={{color:'#64748b',fontSize:11,marginTop:2}}>CRM · Cloud</div>
-                {syncStatus==='idle'&&lastSync&&<div style={{color:'#0d9488',fontSize:10,marginTop:3}}>🟢 Sync {lastSync}</div>}
-                {syncStatus==='saving'&&<div style={{color:'#f59e0b',fontSize:10,marginTop:3}}>⏳ Guardando...</div>}
+                <div style={{color:'#64748b',fontSize:11,marginTop:2}}>CRM · Multi-usuario</div>
+                <div style={{color:syncColor,fontSize:10,marginTop:3}}>
+                  {syncStatus==='idle'&&lastSync&&`🟢 Sync ${lastSync}`}
+                  {syncStatus==='saving'&&'⏳ Guardando...'}
+                  {syncStatus==='checking'&&'🔄 Verificando...'}
+                  {syncStatus==='pending'&&`🟡 ${pendingCount} cambio(s)`}
+                  {syncStatus==='error'&&'🔴 Error de conexión'}
+                </div>
               </div>
             ):(
               <div style={{color:'white',fontFamily:'Syne,sans-serif',fontWeight:800,fontSize:15,textAlign:'center'}}>GV</div>
@@ -944,17 +1008,13 @@ function App(){
           <nav style={{flex:1,padding:'10px 8px',overflowY:'auto'}}>
             {NAV.map(n=>{
               const active=sec===n.id;
-              return(
-                <button key={n.id} onClick={()=>setSec(n.id)} style={{width:'100%',display:'flex',alignItems:'center',gap:10,padding:'10px 12px',borderRadius:10,marginBottom:4,background:active?'#0d9488':'transparent',color:active?'white':'#94a3b8',fontSize:14,fontWeight:active?600:400,border:'none',cursor:'pointer',textAlign:'left'}}
-                  onMouseEnter={e=>{if(!active){e.currentTarget.style.background='rgba(255,255,255,.06)';e.currentTarget.style.color='white';}}}
-                  onMouseLeave={e=>{if(!active){e.currentTarget.style.background='transparent';e.currentTarget.style.color='#94a3b8';}}}>
-                  <span style={{fontSize:16,lineHeight:1}}>{n.icon}</span>
-                  {sideOpen&&<span style={{flex:1}}>{n.label}</span>}
-                  {sideOpen&&n.id==='tareas'&&tareasAltas>0&&(
-                    <span style={{background:'#ef4444',color:'white',fontSize:10,borderRadius:'50%',width:18,height:18,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700}}>{tareasAltas}</span>
-                  )}
-                </button>
-              );
+              return <button key={n.id} onClick={()=>setSec(n.id)} style={{width:'100%',display:'flex',alignItems:'center',gap:10,padding:'10px 12px',borderRadius:10,marginBottom:4,background:active?'#0d9488':'transparent',color:active?'white':'#94a3b8',fontSize:14,fontWeight:active?600:400,border:'none',cursor:'pointer',textAlign:'left'}}
+                onMouseEnter={e=>{if(!active){e.currentTarget.style.background='rgba(255,255,255,.06)';e.currentTarget.style.color='white';}}}
+                onMouseLeave={e=>{if(!active){e.currentTarget.style.background='transparent';e.currentTarget.style.color='#94a3b8';}}}>
+                <span style={{fontSize:16,lineHeight:1}}>{n.icon}</span>
+                {sideOpen&&<span style={{flex:1}}>{n.label}</span>}
+                {sideOpen&&n.id==='tareas'&&tareasAltas>0&&<span style={{background:'#ef4444',color:'white',fontSize:10,borderRadius:'50%',width:18,height:18,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700}}>{tareasAltas}</span>}
+              </button>;
             })}
           </nav>
           <div style={{padding:'10px 8px',borderTop:'1px solid rgba(255,255,255,.08)'}}>
@@ -964,10 +1024,10 @@ function App(){
             </button>
           </div>
         </aside>
-
-        {/* Main content */}
+ 
+        {/* ── MAIN CONTENT ── */}
         <main style={{flex:1,overflowY:'auto',background:'#f1f5f9'}}>
-          <div style={{maxWidth:1100,margin:'0 auto',padding:'28px'}}>
+          <div className="main-content" style={{maxWidth:1100,margin:'0 auto',padding:'28px'}}>
             {sec==='dashboard'&&<Dashboard clientes={clientes} leads={leads} presupuestos={presupuestos} obras={obras} tareas={tareas} setSeccion={setSec}/>}
             {sec==='clientes'&&<Clientes clientes={clientes} setClientes={setC}/>}
             {sec==='leads'&&<Leads leads={leads} setLeads={setL}/>}
@@ -977,17 +1037,145 @@ function App(){
           </div>
         </main>
       </div>
-
-      {/* Toast */}
-      {toast&&(
-        <div className="slide-up" style={{position:'fixed',bottom:24,right:24,background:toast.type==='error'?'#ef4444':'#0d9488',color:'white',padding:'12px 20px',borderRadius:12,fontSize:14,fontWeight:500,zIndex:9999,boxShadow:'0 8px 24px rgba(0,0,0,.2)'}}>
-          {toast.msg}
-        </div>
-      )}
+ 
+      {/* ── MOBILE BOTTOM NAV ── */}
+      <nav className="bottom-nav">
+        {NAV.map(n=>(
+          <button key={n.id} className={`bottom-nav-item ${sec===n.id?'active':''}`} onClick={()=>setSec(n.id)}>
+            <span className="nav-icon">{n.icon}</span>
+            <span>{n.label}</span>
+            {n.id==='tareas'&&tareasAltas>0&&<span className="bottom-nav-badge">{tareasAltas}</span>}
+          </button>
+        ))}
+      </nav>
+ 
+      {/* ── TOAST ── */}
+      {toast&&<div className="slide-up" style={{position:'fixed',bottom:isMobile?80:24,right:16,left:isMobile?16:'auto',background:toast.type==='error'?'#ef4444':'#0d9488',color:'white',padding:'12px 18px',borderRadius:12,fontSize:14,fontWeight:500,zIndex:9999,boxShadow:'0 8px 24px rgba(0,0,0,.2)',textAlign:isMobile?'center':'left'}}>{toast.msg}</div>}
     </div>
   );
 }
-
+ 
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+ 
+function App(){
+  const [scriptUrl,setScriptUrl]=useLs('gv_cloud_url_v2','');
+  const [appState,setAppState]=useState(scriptUrl?'loading':'setup');
+  const [loadMsg,setLoadMsg]=useState('Cargando desde Google Sheets...');
+  const [sec,setSec]=useState('dashboard');
+  const [sideOpen,setSideOpen]=useState(true);
+ 
+  const [clientes,setClientes]=useState([]);
+  const [leads,setLeads]=useState([]);
+  const [presupuestos,setPresupuestos]=useState([]);
+  const [obras,setObras]=useState([]);
+  const [tareas,setTareas]=useState([]);
+ 
+  const [syncStatus,setSyncStatus]=useState('idle');
+  const [lastSync,setLastSync]=useState('');
+  const [hasConflict,setHasConflict]=useState(false);
+  const [pendingCount,setPendingCount]=useState(0);
+  const [toast,setToast]=useState(null);
+ 
+  const saveTimer=useRef(null);
+  const refreshTimer=useRef(null);
+  const lastSavedTs=useRef('');
+  const dataReady=useRef(false);
+  const isSaving=useRef(false);
+ 
+  const tareasAltas=tareas.filter(t=>t.estado==='Pendiente'&&t.prioridad==='Alta').length;
+ 
+  /* ── carga inicial ── */
+  useEffect(()=>{
+    if(scriptUrl&&appState==='loading') loadData(scriptUrl,true);
+  },[]);
+ 
+  async function loadData(url,initial=false){
+    if(initial) setLoadMsg('Cargando desde Google Sheets...');
+    try{
+      const d=await sheetsLoad(url);
+      const empty=!d.clientes.length&&!d.leads.length&&!d.tareas.length;
+      if(empty&&initial){
+        setLoadMsg('Primera vez — inicializando datos de ejemplo...');
+        setClientes(INIT.clientes);setLeads(INIT.leads);setPresupuestos(INIT.presupuestos);setObras(INIT.obras);setTareas(INIT.tareas);
+        const ts=await sheetsSave(url,INIT.clientes,INIT.leads,INIT.presupuestos,INIT.obras,INIT.tareas);
+        lastSavedTs.current=ts;
+      } else {
+        setClientes(d.clientes);setLeads(d.leads);setPresupuestos(d.presupuestos);setObras(d.obras);setTareas(d.tareas);
+        if(d.lastModified) lastSavedTs.current=d.lastModified;
+      }
+      setLastSync(hora());
+      setSyncStatus('idle');
+      setHasConflict(false);
+      if(initial){setAppState('loaded');setTimeout(()=>{dataReady.current=true;startAutoRefresh(url);},600);}
+    }catch(e){
+      if(initial){showToast('❌ Error al cargar: '+e.message,'error');setAppState('setup');}
+      else{setSyncStatus('error');}
+    }
+  }
+ 
+  /* ── auto-refresh para detectar cambios de otros usuarios ── */
+  function startAutoRefresh(url){
+    if(refreshTimer.current) clearInterval(refreshTimer.current);
+    refreshTimer.current=setInterval(async()=>{
+      if(isSaving.current||syncStatus==='saving') return;
+      setSyncStatus('checking');
+      try{
+        const d=await sheetsLoad(url);
+        if(d.lastModified && d.lastModified > lastSavedTs.current && syncStatus!=='pending'){
+          setHasConflict(true);
+          setSyncStatus('idle');
+        } else {
+          setSyncStatus('idle');
+        }
+      }catch{setSyncStatus('idle');}
+    }, AUTO_REFRESH_MS);
+  }
+ 
+  useEffect(()=>()=>{
+    if(refreshTimer.current) clearInterval(refreshTimer.current);
+    if(saveTimer.current) clearTimeout(saveTimer.current);
+  },[]);
+ 
+  async function handleConnect(url){
+    setScriptUrl(url);setAppState('loading');
+    await loadData(url,true);
+  }
+ 
+  function disconnect(){
+    if(confirm('¿Desconectar de Google Sheets?')){
+      if(refreshTimer.current) clearInterval(refreshTimer.current);
+      setScriptUrl('');localStorage.removeItem('gv_cloud_url_v2');
+      setAppState('setup');dataReady.current=false;
+    }
+  }
+ 
+  /* ── guardar con debounce ── */
+  async function doSave(c,l,p,o,t){
+    if(saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current=setTimeout(async()=>{
+      isSaving.current=true;setSyncStatus('saving');
+      try{
+        const ts=await sheetsSave(scriptUrl,c,l,p,o,t);
+        lastSavedTs.current=ts;
+        setSyncStatus('idle');setLastSync(hora());
+        setPendingCount(0);setHasConflict(false);
+      }catch(e){
+        setSyncStatus('error');showToast('❌ Error al guardar: '+e.message,'error');
+      }finally{isSaving.current=false;}
+    },2500);
+  }
+ 
+  async function manualSave(){
+    if(saveTimer.current) clearTimeout(saveTimer.current);
+    isSaving.current=true;setSyncStatus('saving');
+    try{
+      const ts=await sheetsSave(scriptUrl,clientes,leads,presupuestos,obras,tareas);
+      lastSavedTs.current=ts;setSyncStatus('idle');setLastSync(hora());
+      setPendingCount(0);setHasConflict(false);showToast('✓ Guardado en Google Sheets');
+    }catch(e){setSyncStatus('error');showToast('❌ Error: '+e.message,'error');}
+    finally{isSaving.current=false;}
+  }
+ 
 ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
 </script>
 </body>
