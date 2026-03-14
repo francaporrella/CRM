@@ -20,12 +20,12 @@ body{font-family:'DM Sans',sans-serif;margin:0;background:#f1f5f9;overscroll-beh
 .syne{font-family:'Syne',sans-serif;}
 ::-webkit-scrollbar{width:4px;height:4px;}
 ::-webkit-scrollbar-thumb{background:#94a3b8;border-radius:4px;}
- 
+
 /* Kanban */
 .kanban-scroll{overflow-x:auto;padding-bottom:12px;}
 .kanban-board{display:flex;gap:16px;min-width:max-content;}
 .kanban-col{width:210px;min-height:300px;}
- 
+
 /* Animations */
 .fade-in{animation:fadeIn .25s ease;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
@@ -35,20 +35,20 @@ body{font-family:'DM Sans',sans-serif;margin:0;background:#f1f5f9;overscroll-beh
 @keyframes slideDown{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:none;}}
 .modal-up{animation:modalUp .3s cubic-bezier(.32,0,.67,0) reverse, modalUp .3s cubic-bezier(.33,1,.68,1);}
 @keyframes modalUp{from{opacity:0;transform:translateY(100%);}to{opacity:1;transform:none;}}
- 
+
 /* Interactions */
 input:focus,select:focus,textarea:focus{outline:none;box-shadow:0 0 0 2px #14b8a6;}
 .card-hover{transition:box-shadow .15s;}
 @media(hover:hover){.card-hover:hover{box-shadow:0 4px 20px rgba(0,0,0,.08);}}
 button:active{opacity:.75;}
- 
+
 /* Utility */
 @keyframes spin{to{transform:rotate(360deg)}}
 .spin{animation:spin 1s linear infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 .pulse{animation:pulse 1.5s infinite;}
 .sync-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;transition:background .3s;}
- 
+
 /* ── MOBILE LAYOUT ── */
 @media(max-width:767px){
   /* Bottom nav */
@@ -71,7 +71,7 @@ button:active{opacity:.75;}
     border-radius:20px;min-width:16px;height:16px;
     display:flex;align-items:center;justify-content:center;padding:0 3px;
   }
- 
+
   /* Mobile header */
   .mobile-header{
     display:flex;align-items:center;justify-content:space-between;
@@ -80,10 +80,10 @@ button:active{opacity:.75;}
   }
   .desktop-sidebar{display:none !important;}
   .desktop-syncbar{display:none !important;}
- 
+
   /* Main content gets bottom padding for nav bar */
   .main-content{padding-bottom:72px !important;}
- 
+
   /* Full-screen modals on mobile */
   .modal-overlay{
     align-items:flex-end !important;padding:0 !important;
@@ -93,17 +93,17 @@ button:active{opacity:.75;}
     max-height:92vh !important;width:100% !important;max-width:100% !important;
     animation:modalUp .3s cubic-bezier(.33,1,.68,1);
   }
- 
+
   /* Compact content padding */
   .page-pad{padding:16px !important;}
- 
+
   /* Bigger touch targets */
   .touch-target{min-height:44px;display:flex;align-items:center;}
   input,select,textarea{font-size:16px !important;} /* prevent zoom on iOS */
- 
+
   /* Hide desktop-only elements */
   .desktop-only{display:none !important;}
- 
+
   /* Kanban mobile: single column selector */
   .kanban-mobile-selector{
     display:flex;gap:8px;overflow-x:auto;padding:0 0 8px;
@@ -113,7 +113,7 @@ button:active{opacity:.75;}
   .kanban-desktop{display:none;}
   .kanban-mobile-col{display:block;}
 }
- 
+
 @media(min-width:768px){
   .bottom-nav{display:none;}
   .mobile-header{display:none;}
@@ -128,7 +128,7 @@ button:active{opacity:.75;}
 <div id="root"></div>
 <script type="text/babel">
 const {useState,useEffect,useRef,useMemo,useCallback}=React;
- 
+
 /* ─── INIT DATA ─── */
 const INIT={
   clientes:[
@@ -167,7 +167,7 @@ const INIT={
     {id:7,titulo:"Actualizar catálogo con nuevos modelos SPC",prioridad:"Baja",tipo:"Interno",estado:"Pendiente",vencimiento:"2026-03-25",notas:""},
   ],
 };
- 
+
 /* ─── CONSTANTS ─── */
 const ETAPAS=["Nuevo contacto","Visita/Medición","Presupuesto enviado","Negociación","Ganado","Perdido"];
 const ORIGENES=["WhatsApp","Instagram","Web","Referido","Showroom","Otro"];
@@ -178,7 +178,7 @@ const EST_OBRA=["Pendiente de materiales","En instalación","Terminada","Cobrada
 const EST_PPTO=["Borrador","Enviado","Aprobado","Rechazado","Vencido"];
 const TIPOS_TAREA=["Seguimiento","Presupuesto","Obra","Interno","Marketing"];
 const AUTO_REFRESH_MS = 45000; // 45 segundos
- 
+
 /* ─── HELPERS ─── */
 const nid=()=>Date.now()+Math.floor(Math.random()*9999);
 const hoy=()=>new Date().toISOString().slice(0,10);
@@ -190,7 +190,7 @@ const s=v=>String(v||'');
 const n=v=>Number(v)||0;
 const si=v=>s(v).toLowerCase()==='sí'||s(v).toLowerCase()==='si';
 const hora=()=>new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
- 
+
 function useLs(key,init){
   const [v,setV]=useState(()=>{try{const x=localStorage.getItem(key);return x?JSON.parse(x):init;}catch{return init;}});
   useEffect(()=>{try{localStorage.setItem(key,JSON.stringify(v));}catch{}},[key,v]);
@@ -205,7 +205,7 @@ function useIsMobile(){
   },[]);
   return mob;
 }
- 
+
 /* ─── SHEETS API ─── */
 const toRowCliente  =c=>[c.id,c.nombre,c.telefono,c.email,c.direccion,c.tipo,c.etiqueta,c.notas,c.creado];
 const toRowLead     =l=>[l.id,l.clienteNombre,l.telefono,l.origen,l.producto,l.etapa,l.valor,l.fechaSeguimiento,l.notas,l.creado];
@@ -261,7 +261,7 @@ async function sheetsSave(url,clientes,leads,presupuestos,obras,tareas){
   if(!j.ok)throw new Error(j.error);
   return ts;
 }
- 
+
 /* ─── COLORS ─── */
 const C={
   etapa:{"Nuevo contacto":"bg-slate-100 text-slate-600","Visita/Medición":"bg-blue-100 text-blue-700","Presupuesto enviado":"bg-amber-100 text-amber-700","Negociación":"bg-orange-100 text-orange-700","Ganado":"bg-green-100 text-green-700","Perdido":"bg-red-100 text-red-600"},
@@ -273,11 +273,11 @@ const C={
   tcli:{"Particular":"bg-blue-50 text-blue-600","Empresa":"bg-indigo-50 text-indigo-600","Arquitecto":"bg-violet-50 text-violet-600","Distribuidor":"bg-teal-50 text-teal-600"},
 };
 const TICON={Particular:"👤",Empresa:"🏢",Arquitecto:"📐",Distribuidor:"🚚"};
- 
+
 /* ─── BASE UI ─── */
 function Badge({text,cls}){return <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${cls||"bg-slate-100 text-slate-600"}`}>{text}</span>;}
 function Spinner({size=4}){return <svg className={`spin w-${size} h-${size}`} fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>;}
- 
+
 function Modal({title,onClose,children,size="md"}){
   const w=size==="lg"?"max-w-3xl":"max-w-xl";
   return(
@@ -299,7 +299,7 @@ function Btn({children,variant="primary",className="",...p}){
   const vs={primary:"bg-teal-600 text-white hover:bg-teal-700",secondary:"bg-slate-100 text-slate-700 hover:bg-slate-200",danger:"bg-red-500 text-white hover:bg-red-600"};
   return <button className={`px-4 py-2 text-sm rounded-lg font-medium transition ${vs[variant]} ${className}`} {...p}>{children}</button>;
 }
- 
+
 /* ─── SETUP SCREEN ─── */
 function SetupScreen({onConnect}){
   const [url,setUrl]=useState('');
@@ -339,7 +339,7 @@ function SetupScreen({onConnect}){
     </div>
   );
 }
- 
+
 /* ─── LOADING ─── */
 function LoadingScreen({msg}){
   return(
@@ -352,7 +352,7 @@ function LoadingScreen({msg}){
     </div>
   );
 }
- 
+
 /* ─── CONFLICT BANNER ─── */
 function ConflictBanner({onRefresh,who}){
   return(
@@ -365,7 +365,7 @@ function ConflictBanner({onRefresh,who}){
     </div>
   );
 }
- 
+
 /* ─── SYNC BAR ─── */
 function SyncBar({status,lastSync,pendingCount,onSave,onDisconnect}){
   const cfgs={
@@ -387,7 +387,7 @@ function SyncBar({status,lastSync,pendingCount,onSave,onDisconnect}){
     </div>
   );
 }
- 
+
 /* ─── DASHBOARD ─── */
 function Dashboard({clientes,leads,presupuestos,obras,tareas,setSeccion}){
   const activos=leads.filter(l=>!["Ganado","Perdido"].includes(l.etapa));
@@ -473,7 +473,7 @@ function Dashboard({clientes,leads,presupuestos,obras,tareas,setSeccion}){
     </div>
   );
 }
- 
+
 /* ─── CLIENTES ─── */
 function Clientes({clientes,setClientes}){
   const [search,setSearch]=useState('');
@@ -523,7 +523,7 @@ function Clientes({clientes,setClientes}){
     </div>
   );
 }
- 
+
 /* ─── LEADS ─── */
 function Leads({leads,setLeads}){
   const [modal,setModal]=useState(null);
@@ -537,7 +537,7 @@ function Leads({leads,setLeads}){
   function avanzar(id){setLeads(p=>p.map(l=>{if(l.id!==id)return l;const i=ETAPAS.indexOf(l.etapa);return i<ETAPAS.length-1?{...l,etapa:ETAPAS[i+1]}:l;}));}
   function retroceder(id){setLeads(p=>p.map(l=>{if(l.id!==id)return l;const i=ETAPAS.indexOf(l.etapa);return i>0?{...l,etapa:ETAPAS[i-1]}:l;}));}
   const activos=leads.filter(l=>!["Ganado","Perdido"].includes(l.etapa));
- 
+
   const KanbanCard=({l,etapa})=>(
     <div className="bg-white border border-slate-100 rounded-xl p-3 cursor-pointer card-hover" onClick={()=>{setForm({...l,valor:String(l.valor||'')});setModal(l);}}>
       <p className="font-semibold text-slate-800 text-sm">{l.clienteNombre}</p>
@@ -551,7 +551,7 @@ function Leads({leads,setLeads}){
       </div>}
     </div>
   );
- 
+
   return(
     <div className="fade-in">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
@@ -564,7 +564,7 @@ function Leads({leads,setLeads}){
           <Btn onClick={()=>{setForm(empty);setModal('add');}}>+ Nuevo</Btn>
         </div>
       </div>
- 
+
       {/* ── MOBILE KANBAN: column selector tabs ── */}
       <div className="kanban-mobile-selector mb-3">
         {ETAPAS.map((etapa,i)=>{
@@ -588,7 +588,7 @@ function Leads({leads,setLeads}){
           </div>;
         })()}
       </div>
- 
+
       {/* ── DESKTOP KANBAN ── */}
       <div className="kanban-desktop">
         {(vista==='kanban')?(
@@ -619,7 +619,7 @@ function Leads({leads,setLeads}){
           ))}</div>
         )}
       </div>
- 
+
       {modal&&<Modal title={modal==='add'?'Nuevo lead':'Editar lead'} onClose={()=>setModal(null)}>
         <div className="grid grid-cols-2 gap-x-4">
           <FI label="Nombre del contacto *" value={form.clienteNombre} onChange={e=>setForm({...form,clienteNombre:e.target.value})}/>
@@ -639,7 +639,7 @@ function Leads({leads,setLeads}){
     </div>
   );
 }
- 
+
 /* ─── PRESUPUESTOS ─── */
 function Presupuestos({presupuestos,setPresupuestos}){
   const [modal,setModal]=useState(null);
@@ -714,7 +714,7 @@ function Presupuestos({presupuestos,setPresupuestos}){
     </div>
   );
 }
- 
+
 /* ─── OBRAS ─── */
 function Obras({obras,setObras}){
   const [modal,setModal]=useState(null);
@@ -786,7 +786,7 @@ function Obras({obras,setObras}){
     </div>
   );
 }
- 
+
 /* ─── TAREAS ─── */
 function Tareas({tareas,setTareas}){
   const [modal,setModal]=useState(false);
@@ -835,12 +835,12 @@ function Tareas({tareas,setTareas}){
     </div>
   );
 }
- 
+
 /* ═══════════════════════════════════════════
    APP PRINCIPAL — con gestión de concurrencia y soporte mobile
 ═══════════════════════════════════════════ */
 const NAV=[{id:'dashboard',label:'Inicio',icon:'📊'},{id:'clientes',label:'Clientes',icon:'👥'},{id:'leads',label:'Leads',icon:'🔥'},{id:'presupuestos',label:'Ppto.',icon:'📋'},{id:'obras',label:'Obras',icon:'🏗️'},{id:'tareas',label:'Tareas',icon:'✅'}];
- 
+
 function App(){
   const isMobile=useIsMobile();
   const [scriptUrl,setScriptUrl]=useLs('gv_cloud_url_v2','');
@@ -848,29 +848,29 @@ function App(){
   const [loadMsg,setLoadMsg]=useState('Cargando desde Google Sheets...');
   const [sec,setSec]=useState('dashboard');
   const [sideOpen,setSideOpen]=useState(true);
- 
+
   const [clientes,setClientes]=useState([]);
   const [leads,setLeads]=useState([]);
   const [presupuestos,setPresupuestos]=useState([]);
   const [obras,setObras]=useState([]);
   const [tareas,setTareas]=useState([]);
- 
+
   const [syncStatus,setSyncStatus]=useState('idle');
   const [lastSync,setLastSync]=useState('');
   const [hasConflict,setHasConflict]=useState(false);
   const [pendingCount,setPendingCount]=useState(0);
   const [toast,setToast]=useState(null);
- 
+
   const saveTimer=useRef(null);
   const refreshTimer=useRef(null);
   const lastSavedTs=useRef('');
   const dataReady=useRef(false);
   const isSaving=useRef(false);
- 
+
   const tareasAltas=tareas.filter(t=>t.estado==='Pendiente'&&t.prioridad==='Alta').length;
- 
+
   useEffect(()=>{if(scriptUrl&&appState==='loading') loadData(scriptUrl,true);},[]);
- 
+
   async function loadData(url,initial=false){
     if(initial) setLoadMsg('Cargando desde Google Sheets...');
     try{
@@ -892,7 +892,7 @@ function App(){
       else setSyncStatus('error');
     }
   }
- 
+
   function startAutoRefresh(url){
     if(refreshTimer.current) clearInterval(refreshTimer.current);
     refreshTimer.current=setInterval(async()=>{
@@ -906,14 +906,14 @@ function App(){
       }catch{setSyncStatus(s=>s==='checking'?'idle':s);}
     },AUTO_REFRESH_MS);
   }
- 
+
   useEffect(()=>()=>{
     if(refreshTimer.current) clearInterval(refreshTimer.current);
     if(saveTimer.current) clearTimeout(saveTimer.current);
   },[]);
- 
+
   async function handleConnect(url){setScriptUrl(url);setAppState('loading');await loadData(url,true);}
- 
+
   function disconnect(){
     if(confirm('¿Desconectar de Google Sheets?')){
       if(refreshTimer.current) clearInterval(refreshTimer.current);
@@ -921,7 +921,7 @@ function App(){
       setAppState('setup');dataReady.current=false;
     }
   }
- 
+
   async function doSave(c,l,p,o,t){
     if(saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current=setTimeout(async()=>{
@@ -933,7 +933,7 @@ function App(){
       finally{isSaving.current=false;}
     },2500);
   }
- 
+
   async function manualSave(){
     if(saveTimer.current) clearTimeout(saveTimer.current);
     isSaving.current=true;setSyncStatus('saving');
@@ -944,27 +944,27 @@ function App(){
     }catch(e){setSyncStatus('error');showToast('❌ Error: '+e.message,'error');}
     finally{isSaving.current=false;}
   }
- 
+
   function setC(v){const nv=typeof v==='function'?v(clientes):v;setClientes(nv);if(!dataReady.current)return;setSyncStatus('pending');setPendingCount(c=>c+1);doSave(nv,leads,presupuestos,obras,tareas);}
   function setL(v){const nv=typeof v==='function'?v(leads):v;setLeads(nv);if(!dataReady.current)return;setSyncStatus('pending');setPendingCount(c=>c+1);doSave(clientes,nv,presupuestos,obras,tareas);}
   function setP(v){const nv=typeof v==='function'?v(presupuestos):v;setPresupuestos(nv);if(!dataReady.current)return;setSyncStatus('pending');setPendingCount(c=>c+1);doSave(clientes,leads,nv,obras,tareas);}
   function setO(v){const nv=typeof v==='function'?v(obras):v;setObras(nv);if(!dataReady.current)return;setSyncStatus('pending');setPendingCount(c=>c+1);doSave(clientes,leads,presupuestos,nv,tareas);}
   function setT(v){const nv=typeof v==='function'?v(tareas):v;setTareas(nv);if(!dataReady.current)return;setSyncStatus('pending');setPendingCount(c=>c+1);doSave(clientes,leads,presupuestos,obras,nv);}
- 
+
   function handleRefresh(){setHasConflict(false);loadData(scriptUrl,false);}
   function showToast(msg,type='success'){setToast({msg,type});setTimeout(()=>setToast(null),3500);}
- 
+
   const syncColor={idle:'#0d9488',saving:'#f59e0b',checking:'#94a3b8',pending:'#f59e0b',error:'#ef4444'}[syncStatus]||'#0d9488';
- 
+
   if(appState==='setup') return <SetupScreen onConnect={handleConnect}/>;
   if(appState==='loading') return <LoadingScreen msg={loadMsg}/>;
- 
+
   return(
     <div style={{display:'flex',height:'100vh',overflow:'hidden',flexDirection:'column'}}>
- 
+
       {/* ── CONFLICT BANNER ── */}
       {hasConflict&&<ConflictBanner onRefresh={handleRefresh}/>}
- 
+
       {/* ── MOBILE HEADER (visible solo en mobile) ── */}
       <div className="mobile-header">
         <div style={{display:'flex',alignItems:'center',gap:10}}>
@@ -978,14 +978,14 @@ function App(){
           <button onClick={disconnect} style={{color:'#475569',background:'none',border:'none',fontSize:18,cursor:'pointer',padding:'4px'}}>⚙️</button>
         </div>
       </div>
- 
+
       {/* ── DESKTOP SYNC BAR (hidden on mobile via CSS) ── */}
       <div className="desktop-syncbar">
         <SyncBar status={syncStatus} lastSync={lastSync} pendingCount={pendingCount} onSave={manualSave} onDisconnect={disconnect}/>
       </div>
- 
+
       <div style={{display:'flex',flex:1,overflow:'hidden'}}>
- 
+
         {/* ── DESKTOP SIDEBAR ── */}
         <aside className="desktop-sidebar" style={{width:sideOpen?220:64,flexShrink:0,background:'#0f172a',display:'flex',flexDirection:'column',transition:'width .25s ease'}}>
           <div style={{padding:'18px 16px 14px',borderBottom:'1px solid rgba(255,255,255,.08)'}}>
@@ -1024,7 +1024,7 @@ function App(){
             </button>
           </div>
         </aside>
- 
+
         {/* ── MAIN CONTENT ── */}
         <main style={{flex:1,overflowY:'auto',background:'#f1f5f9'}}>
           <div className="main-content" style={{maxWidth:1100,margin:'0 auto',padding:'28px'}}>
@@ -1037,7 +1037,7 @@ function App(){
           </div>
         </main>
       </div>
- 
+
       {/* ── MOBILE BOTTOM NAV ── */}
       <nav className="bottom-nav">
         {NAV.map(n=>(
@@ -1048,47 +1048,47 @@ function App(){
           </button>
         ))}
       </nav>
- 
+
       {/* ── TOAST ── */}
       {toast&&<div className="slide-up" style={{position:'fixed',bottom:isMobile?80:24,right:16,left:isMobile?16:'auto',background:toast.type==='error'?'#ef4444':'#0d9488',color:'white',padding:'12px 18px',borderRadius:12,fontSize:14,fontWeight:500,zIndex:9999,boxShadow:'0 8px 24px rgba(0,0,0,.2)',textAlign:isMobile?'center':'left'}}>{toast.msg}</div>}
     </div>
   );
 }
- 
+
 ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
- 
+
 function App(){
   const [scriptUrl,setScriptUrl]=useLs('gv_cloud_url_v2','');
   const [appState,setAppState]=useState(scriptUrl?'loading':'setup');
   const [loadMsg,setLoadMsg]=useState('Cargando desde Google Sheets...');
   const [sec,setSec]=useState('dashboard');
   const [sideOpen,setSideOpen]=useState(true);
- 
+
   const [clientes,setClientes]=useState([]);
   const [leads,setLeads]=useState([]);
   const [presupuestos,setPresupuestos]=useState([]);
   const [obras,setObras]=useState([]);
   const [tareas,setTareas]=useState([]);
- 
+
   const [syncStatus,setSyncStatus]=useState('idle');
   const [lastSync,setLastSync]=useState('');
   const [hasConflict,setHasConflict]=useState(false);
   const [pendingCount,setPendingCount]=useState(0);
   const [toast,setToast]=useState(null);
- 
+
   const saveTimer=useRef(null);
   const refreshTimer=useRef(null);
   const lastSavedTs=useRef('');
   const dataReady=useRef(false);
   const isSaving=useRef(false);
- 
+
   const tareasAltas=tareas.filter(t=>t.estado==='Pendiente'&&t.prioridad==='Alta').length;
- 
+
   /* ── carga inicial ── */
   useEffect(()=>{
     if(scriptUrl&&appState==='loading') loadData(scriptUrl,true);
   },[]);
- 
+
   async function loadData(url,initial=false){
     if(initial) setLoadMsg('Cargando desde Google Sheets...');
     try{
@@ -1112,7 +1112,7 @@ function App(){
       else{setSyncStatus('error');}
     }
   }
- 
+
   /* ── auto-refresh para detectar cambios de otros usuarios ── */
   function startAutoRefresh(url){
     if(refreshTimer.current) clearInterval(refreshTimer.current);
@@ -1130,17 +1130,17 @@ function App(){
       }catch{setSyncStatus('idle');}
     }, AUTO_REFRESH_MS);
   }
- 
+
   useEffect(()=>()=>{
     if(refreshTimer.current) clearInterval(refreshTimer.current);
     if(saveTimer.current) clearTimeout(saveTimer.current);
   },[]);
- 
+
   async function handleConnect(url){
     setScriptUrl(url);setAppState('loading');
     await loadData(url,true);
   }
- 
+
   function disconnect(){
     if(confirm('¿Desconectar de Google Sheets?')){
       if(refreshTimer.current) clearInterval(refreshTimer.current);
@@ -1148,7 +1148,7 @@ function App(){
       setAppState('setup');dataReady.current=false;
     }
   }
- 
+
   /* ── guardar con debounce ── */
   async function doSave(c,l,p,o,t){
     if(saveTimer.current) clearTimeout(saveTimer.current);
@@ -1164,7 +1164,7 @@ function App(){
       }finally{isSaving.current=false;}
     },2500);
   }
- 
+
   async function manualSave(){
     if(saveTimer.current) clearTimeout(saveTimer.current);
     isSaving.current=true;setSyncStatus('saving');
@@ -1175,7 +1175,7 @@ function App(){
     }catch(e){setSyncStatus('error');showToast('❌ Error: '+e.message,'error');}
     finally{isSaving.current=false;}
   }
- 
+
 ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
 </script>
 </body>
